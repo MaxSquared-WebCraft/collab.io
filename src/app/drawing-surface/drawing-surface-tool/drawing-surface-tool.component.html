@@ -1,0 +1,10 @@
+<div class="color-picker-toolbar">
+  <div class="array-colors-element is-pen" [(colorPicker)]="arrayColors[selectedColorIdx]"
+       [style.background]="arrayColors[selectedColorIdx]" [cpPosition]="'top'"
+       (colorPickerChange)="onColorSelected(selectedColorIdx)">
+    <clr-icon shape="pencil" class="is-solid is-inverse"></clr-icon>
+  </div>
+  <div class="array-colors-element" *ngFor="let color of arrayColors; let i = index" [attr.data-index]="i"
+       [style.background]="color" (click)="onColorSelected(i)"></div>
+</div>
+
