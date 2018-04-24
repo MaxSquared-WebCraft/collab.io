@@ -19,7 +19,6 @@ export class DrawingSurfaceUserIndicatorComponent implements OnInit {
       (point: any) => {
         try {
           if (point && point.data && point.data.position) {
-            console.log(point);
             let p = this.renderService.mapScreenToMouse({
               thickness: 1,
               position: new Vector2(point.data.position.x, point.data.position.y)

@@ -43,9 +43,9 @@ export class RenderService {
   }
 
   public init(elementRef: ElementRef) {
-    const width = window.innerWidth;
-    const height = window.innerHeight - (56 * 2);
     this.elementRef = elementRef;
+    const width = this.elementRef.nativeElement.offsetWidth;
+    const height = this.elementRef.nativeElement.offsetHeight;
 
     this.scene = new THREE.Scene();
     this.camera = new THREE.OrthographicCamera(0, width, 0, height, 1, 1000);
@@ -131,8 +131,11 @@ export class RenderService {
   }
 
   public onResize() {
-    const width = window.innerWidth;
-    const height = window.innerHeight - (56 * 2);
+    const width = this.elementRef.nativeElement.offsetWidth;
+    const height = this.elementRef.nativeElement.offsetHeight;
+    //(0, width, 0, height, 1, 1000);
+    this.camera.right = width;
+    this.camera.bottom = height;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height);
   }
