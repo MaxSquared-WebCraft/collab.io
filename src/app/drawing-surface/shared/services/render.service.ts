@@ -58,7 +58,7 @@ export class RenderService {
     });
 
     this.renderer.setSize(width, height);
-    this.renderer.setClearColor(0x666666);
+    this.renderer.setClearColor(0xFFFFFF);
 
     this.elementRef.nativeElement.appendChild(this.renderer.domElement);
 
@@ -104,8 +104,8 @@ export class RenderService {
 
     this.addStats();
     this.calculateFrame();
-    this.render();
     this.initialized = true;
+    setTimeout(() => this.onResize(), 100); // wait till view if fully initialized and fit to screen
     window.addEventListener('resize', _ => this.onResize());
   }
 
