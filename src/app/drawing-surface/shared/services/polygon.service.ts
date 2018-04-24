@@ -79,7 +79,7 @@ export class PolygonService {
     let idx = 0;
     const geometry = new THREE.Geometry();
     let newLine = true;
-    const points = stroke.points; // stroke.getSmoothedStroke();
+    const points = stroke.getSmoothedStroke();
     let oldA: Vector2;
     let oldB: Vector2;
 

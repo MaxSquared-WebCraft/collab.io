@@ -49,7 +49,7 @@ export class RenderService {
 
     this.scene = new THREE.Scene();
     this.camera = new THREE.OrthographicCamera(0, width, 0, height, 1, 1000);
-    this.camera.position.set(0, 0, -500);
+    this.camera.position.set(0, 0, -300);
 
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,

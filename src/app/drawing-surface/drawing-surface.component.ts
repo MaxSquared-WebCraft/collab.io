@@ -42,8 +42,8 @@ export class DrawingSurfaceComponent implements AfterViewInit {
   mouseUp(point: Point) {
     this.currentStroke.points.push(point);
     const oldPointCount = this.currentStroke.points.length;
-    this.currentStroke.points = this.simplifyService.simplify(this.currentStroke.points, 0.5);
-    console.log('Points reduced from ' + oldPointCount + ' to ' + this.currentStroke.points.length);
+    // this.currentStroke.points = this.simplifyService.simplify(this.currentStroke.points, 0.5);
+    // console.log('Points reduced from ' + oldPointCount + ' to ' + this.currentStroke.points.length);
 
     const mesh = this.polygonService.addStroke(this.currentStroke);
     if (mesh) {
