@@ -27,6 +27,7 @@ export class RenderService {
   initialized = false;
   mouseDown$: Observable<Point>;
   mouseMove$: Observable<Point>;
+  mouseDrawing$: Observable<Point>;
   mouseUp$: Observable<Point>;
   private stats: any;
   private scene: Scene;
@@ -39,15 +40,6 @@ export class RenderService {
 
   constructor(private serverSocket: ServerSocket) {
     this.serverSocket.connect();
-
-    // takeUntil;
-    this.serverSocket.messages.subscribe((message: string) => {
-      console.log('received message from server: ', message)
-    });
-
-    // send message to server, if the socket is not connected it will be sent
-    // as soon as the connection becomes available thanks to QueueingSubject
-    this.serverSocket.send('hello')
   }
 
   public init(elementRef: ElementRef) {
@@ -77,6 +69,7 @@ export class RenderService {
 
     this.mouseDown$ = Observable
       .fromEvent(elementRef.nativeElement, 'mousedown')
+      .share()
       .map<any, Point>(this.mapMouseToScreen.bind(this))
       .do((point) => {
         this.mouseIsDown = true;
@@ -85,16 +78,29 @@ export class RenderService {
 
     this.mouseMove$ = Observable
       .fromEvent(elementRef.nativeElement, 'mousemove')
-      .filter(() => this.mouseIsDown)
+      .share()
       .map<any, Point>(this.mapMouseToScreen.bind(this));
+
+    this.mouseDrawing$ = this.mouseMove$
+      .filter(() => this.mouseIsDown);
 
     this.mouseUp$ = Observable
       .fromEvent(elementRef.nativeElement, 'mouseup')
+      .share()
       .map<any, Point>(this.mapMouseToScreen.bind(this))
       .do((point) => {
         this.mouseIsDown = false;
         return point;
       });
+
+    this.mouseMove$.subscribe(
+      (point: Point) => this.serverSocket.send(JSON.stringify({
+        type: "mouseMoved",
+        data: {
+          position: point.position,
+        }
+      }))
+    );
 
     this.addStats();
     this.calculateFrame();
@@ -120,7 +126,7 @@ export class RenderService {
   public calculateFrame() {
     this.stats.update();
     this.controls.update();
-    // this.render(); //dont render all the time just render when scene changed
+    this.render(); //dont render all the time just render when scene changed
     requestAnimationFrame(_ => this.calculateFrame());
   }
 
@@ -168,6 +174,18 @@ export class RenderService {
     mouse.z = 2;
     mouse.unproject(this.camera);
     return new Point(new Vector2(mouse.x, mouse.y), event.pressure ? event.pressure : 0.5);
+  }
+
+  mapScreenToMouse(event: Point): Point {
+    let mouse = new Vector3(event.position.x, event.position.y, 0);
+    // mouse = mouse.setFromMatrixPosition(this.camera.modelViewMatrix);
+    mouse.project(this.camera);
+    let widthHalf = this.elementRef.nativeElement.offsetWidth / 2;
+    let heightHalf = this.elementRef.nativeElement.offsetHeight / 2;
+    mouse.x = (mouse.x * widthHalf) + widthHalf;
+    mouse.y = -(mouse.y * heightHalf) + heightHalf;
+
+    return new Point(new Vector2(mouse.x, mouse.y), 1);
   }
 
   /********************************************/

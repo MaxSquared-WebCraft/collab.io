@@ -27,7 +27,7 @@ export class DrawingSurfaceComponent implements AfterViewInit {
     if (this.elementRef) {
       this.renderService.init(this.elementRef);
       this.renderService.mouseUp$.distinctUntilChanged(this.comparer).subscribe(this.mouseUp.bind(this));
-      this.renderService.mouseMove$.distinctUntilChanged(this.comparer).subscribe(this.mouseMove.bind(this));
+      this.renderService.mouseDrawing$.distinctUntilChanged(this.comparer).subscribe(this.mouseMove.bind(this));
       this.renderService.mouseDown$.distinctUntilChanged(this.comparer).subscribe(this.mouseDown.bind(this));
     }
   }
