@@ -15,7 +15,7 @@ import {Point} from "./shared/models/point.model";
 export class DrawingSurfaceComponent implements AfterViewInit {
   @ViewChild('container')
   private elementRef: ElementRef;
-  private currentStroke: Stroke = new Stroke(new Color(100, 100, 100));
+  private currentStroke: Stroke = new Stroke(new Color(0, 0, 0));
   private currentColor: string;
 
   constructor(private simplifyService: SimplifyService,
@@ -41,20 +41,20 @@ export class DrawingSurfaceComponent implements AfterViewInit {
 
   mouseUp(point: Point) {
     this.currentStroke.points.push(point);
-    const oldPointCount = this.currentStroke.points.length;
+    // const oldPointCount = this.currentStroke.points.length;
     // this.currentStroke.points = this.simplifyService.simplify(this.currentStroke.points, 0.5);
     // console.log('Points reduced from ' + oldPointCount + ' to ' + this.currentStroke.points.length);
 
-    const mesh = this.polygonService.addStroke(this.currentStroke);
+    const mesh = this.polygonService.addStrokeBufferGeometry(this.currentStroke);
     if (mesh) {
       this.renderService.addMeshToScene(mesh);
     }
-    this.renderService.updateGeometry(this.polygonService.getLiveStrokeGeometry(new Stroke(new Color('#000000'))));
+    this.renderService.updateGeometry(this.polygonService.getLiveStrokeBufferGeometry(new Stroke(new Color('#000000'))));
   }
 
   mouseMove(point: Point) {
     this.currentStroke.points.push(point);
-    this.renderService.updateGeometry(this.polygonService.getLiveStrokeGeometry(this.currentStroke));
+    this.renderService.updateGeometry(this.polygonService.getLiveStrokeBufferGeometry(this.currentStroke));
   }
 
   mouseDown(point: Point) {

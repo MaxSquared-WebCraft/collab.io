@@ -21,7 +21,7 @@ export class Stroke {
 
         const segmentDistance = 2;
         const distance = midPoint1.distanceTo(midPoint2);
-        const numberOfSegments = Math.min(128, Math.max(Math.floor(distance / segmentDistance), 32));
+        const numberOfSegments = Math.min(16, Math.max(Math.floor(distance / segmentDistance), 32));
 
         let t = 0.0;
         const step = 1.0 / numberOfSegments;

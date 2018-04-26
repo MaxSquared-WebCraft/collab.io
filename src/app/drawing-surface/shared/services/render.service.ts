@@ -1,4 +1,5 @@
 import {
+  BufferGeometry,
   Color,
   Geometry,
   Mesh,
@@ -17,6 +18,7 @@ import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/observable/fromEvent';
 import 'rxjs/add/operator/filter';
 import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/do';
 import {ServerSocket} from "./websocket.service";
 
@@ -25,6 +27,8 @@ declare let THREE: any;
 @Injectable()
 export class RenderService {
   initialized = false;
+  keyDown$: Observable<void>;
+  mouseZoom$: Observable<void>;
   mouseDown$: Observable<Point>;
   mouseMove$: Observable<Point>;
   mouseDrawing$: Observable<Point>;
@@ -70,7 +74,7 @@ export class RenderService {
     this.mouseDown$ = Observable
       .fromEvent(elementRef.nativeElement, 'mousedown')
       .share()
-      .map<any, Point>(this.mapMouseToScreen.bind(this))
+      .map<MouseEvent, Point>(this.mapMouseToScreen.bind(this))
       .do((point) => {
         this.mouseIsDown = true;
         return point;
@@ -79,7 +83,7 @@ export class RenderService {
     this.mouseMove$ = Observable
       .fromEvent(elementRef.nativeElement, 'mousemove')
       .share()
-      .map<any, Point>(this.mapMouseToScreen.bind(this));
+      .map<MouseEvent, Point>(this.mapMouseToScreen.bind(this));
 
     this.mouseDrawing$ = this.mouseMove$
       .filter(() => this.mouseIsDown);
@@ -87,7 +91,7 @@ export class RenderService {
     this.mouseUp$ = Observable
       .fromEvent(elementRef.nativeElement, 'mouseup')
       .share()
-      .map<any, Point>(this.mapMouseToScreen.bind(this))
+      .map<MouseEvent, Point>(this.mapMouseToScreen.bind(this))
       .do((point) => {
         this.mouseIsDown = false;
         return point;
@@ -102,10 +106,25 @@ export class RenderService {
       }))
     );
 
+    this.mouseZoom$ = Observable.fromEvent(elementRef.nativeElement, 'wheel').share();
+    this.keyDown$ = Observable.fromEvent(window, 'keydown').share();
+
+
+    this.mouseZoom$
+      .debounceTime(60)
+      .subscribe(
+        () => this.render()
+      );
+
+    this.keyDown$
+      .subscribe(
+        () => this.render()
+      );
+
     this.addStats();
     this.calculateFrame();
     this.initialized = true;
-    setTimeout(() => this.onResize(), 100); // wait till view if fully initialized and fit to screen
+    setTimeout(() => this.onResize(), 300); // wait till view if fully initialized and fit to screen
     window.addEventListener('resize', _ => this.onResize());
   }
 
@@ -126,7 +145,7 @@ export class RenderService {
   public calculateFrame() {
     this.stats.update();
     this.controls.update();
-    this.render(); //dont render all the time just render when scene changed
+    // this.render(); //dont render all the time just render when scene changed
     requestAnimationFrame(_ => this.calculateFrame());
   }
 
@@ -138,11 +157,12 @@ export class RenderService {
     this.camera.bottom = height;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height);
+    this.render();
   }
 
   /********************************************/
 
-  public updateGeometry(newGeometry: Geometry) {
+  public updateGeometry(newGeometry: BufferGeometry | Geometry) {
     if (!this.liveStrokeMesh) {
       this.liveStrokeMesh = new Mesh(newGeometry, new MeshBasicMaterial({
         color: 0x000000
