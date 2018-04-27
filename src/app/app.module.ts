@@ -6,7 +6,6 @@ import {DrawingSurfaceComponent} from "./drawing-surface/drawing-surface.compone
 import {DrawingSurfaceControlsComponent} from "./drawing-surface/drawing-surface-controls/drawing-surface-controls.component";
 import {DrawingSurfaceToolComponent} from "./drawing-surface/drawing-surface-tool/drawing-surface-tool.component";
 import {ColorPickerModule} from "ngx-color-picker";
-import {PolygonService} from "./drawing-surface/shared/services/polygon.service";
 import {RenderService} from "./drawing-surface/shared/services/render.service";
 import {SimplifyService} from "./drawing-surface/shared/services/simplify.service";
 import {ServerSocket} from "./drawing-surface/shared/services/websocket.service";
@@ -27,11 +26,11 @@ import {DrawingSurfaceUserIndicatorComponent} from "./drawing-surface/drawing-su
     ColorPickerModule
   ],
   providers: [
-    PolygonService,
     RenderService,
     SimplifyService,
     ServerSocket
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+}

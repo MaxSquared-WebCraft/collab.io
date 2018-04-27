@@ -1,10 +1,11 @@
+import {Observable, throwError as observableThrowError} from 'rxjs';
+
+import {map, share} from 'rxjs/operators';
 // file: server-socket.service.ts
 import {Injectable} from '@angular/core'
 import {QueueingSubject} from 'queueing-subject'
-import {Observable} from 'rxjs/Observable'
 import websocketConnect from 'rxjs-websockets'
-import 'rxjs/add/operator/share'
-import 'rxjs/add/observable/throw'
+
 
 @Injectable()
 export class ServerSocket {
@@ -21,14 +22,14 @@ export class ServerSocket {
     this.messages = websocketConnect(
       'ws://127.0.0.1:1337/ws',
       this.inputStream = new QueueingSubject<string>()
-    ).messages.map((message: string) => {
+    ).messages.pipe(map((message: string) => {
       try {
         let msg: any = JSON.parse(message);
         return ({time: msg.data.time, ...JSON.parse(msg.data.utf8Data)});
       } catch (e) {
-        return Observable.throw(e);
+        return observableThrowError(e);
       }
-    }).share()
+    }), share(),)
   }
 
   public send(message: string): void {
