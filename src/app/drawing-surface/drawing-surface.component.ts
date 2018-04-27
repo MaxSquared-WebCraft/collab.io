@@ -3,7 +3,6 @@ import {Color} from 'three';
 import 'rxjs/add/operator/distinctUntilChanged';
 import {Stroke} from "./shared/models/stroke.model";
 import {SimplifyService} from "./shared/services/simplify.service";
-import {PolygonService} from "./shared/services/polygon.service";
 import {RenderService} from "./shared/services/render.service";
 import {Point} from "./shared/models/point.model";
 
@@ -19,8 +18,7 @@ export class DrawingSurfaceComponent implements AfterViewInit {
   private currentColor: string;
 
   constructor(private simplifyService: SimplifyService,
-              private renderService: RenderService,
-              private polygonService: PolygonService) {
+              private renderService: RenderService) {
   }
 
   ngAfterViewInit() {
@@ -39,27 +37,29 @@ export class DrawingSurfaceComponent implements AfterViewInit {
     }
   }
 
+  mouseDown(point: Point) {
+    // this.currentStroke = new Stroke(new Color(this.currentColor));
+    // this.currentStroke.points.push(point);
+    this.renderService.updateGeometry(point, true);
+  }
+
+  mouseMove(point: Point) {
+    // this.currentStroke.points.push(point);
+    this.renderService.updateGeometry(point);
+  }
+
   mouseUp(point: Point) {
-    this.currentStroke.points.push(point);
+    // this.currentStroke.points.push(point);
     // const oldPointCount = this.currentStroke.points.length;
     // this.currentStroke.points = this.simplifyService.simplify(this.currentStroke.points, 0.5);
     // console.log('Points reduced from ' + oldPointCount + ' to ' + this.currentStroke.points.length);
 
-    const mesh = this.polygonService.addStrokeBufferGeometry(this.currentStroke);
-    if (mesh) {
-      this.renderService.addMeshToScene(mesh);
-    }
-    this.renderService.updateGeometry(this.polygonService.getLiveStrokeBufferGeometry(new Stroke(new Color('#000000'))));
-  }
-
-  mouseMove(point: Point) {
-    this.currentStroke.points.push(point);
-    this.renderService.updateGeometry(this.polygonService.getLiveStrokeBufferGeometry(this.currentStroke));
-  }
-
-  mouseDown(point: Point) {
-    this.currentStroke = new Stroke(new Color(this.currentColor));
-    this.currentStroke.points.push(point);
+    // const mesh = this.renderService.addStrokeBufferGeometry(this.currentStroke);
+    // if (mesh) {
+    //   this.renderService.addMeshToScene(mesh);
+    // }
+    // this.renderService.updateGeometry(this.renderService.updateGeometry(new Stroke(new Color('#000000'))));
+    this.renderService.updateGeometry(point);
   }
 
   comparer(point1: Point, point2: Point) {
