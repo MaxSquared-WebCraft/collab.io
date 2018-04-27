@@ -67,7 +67,8 @@ export class PolygonService {
     }
 
     const material = new MeshBasicMaterial({
-      color: stroke.color.getHex()
+      color: stroke.color.getHex(),
+      side: THREE.FrontSide
     });
     return new Mesh(geometry, material);
   }
@@ -131,7 +132,8 @@ export class PolygonService {
     geometry.addAttribute('position', new THREE.Float32BufferAttribute(vertices, 3).onUpload(disposeArray));
 
     const material = new MeshBasicMaterial({
-      color: stroke.color.getHex()
+      color: stroke.color.getHex(),
+      side: THREE.FrontSide
     });
     return new Mesh(geometry, material);
   }

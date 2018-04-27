@@ -27,8 +27,8 @@ declare let THREE: any;
 @Injectable()
 export class RenderService {
   initialized = false;
-  keyDown$: Observable<void>;
-  mouseZoom$: Observable<void>;
+  keyDown$: Observable<any>;
+  mouseZoom$: Observable<any>;
   mouseDown$: Observable<Point>;
   mouseMove$: Observable<Point>;
   mouseDrawing$: Observable<Point>;
@@ -53,7 +53,7 @@ export class RenderService {
 
     this.scene = new THREE.Scene();
     this.camera = new THREE.OrthographicCamera(0, width, 0, height, 1, 1000);
-    this.camera.position.set(0, 0, -300);
+    this.camera.position.set(0, 0, -100);
 
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -72,26 +72,26 @@ export class RenderService {
     this.controls.enableRotate = false;
 
     this.mouseDown$ = Observable
-      .fromEvent(elementRef.nativeElement, 'mousedown')
+      .fromEvent(elementRef.nativeElement, 'pointerdown')
       .share()
-      .map<MouseEvent, Point>(this.mapMouseToScreen.bind(this))
+      .map<any, Point>(this.mapMouseToScreen.bind(this))
       .do((point) => {
         this.mouseIsDown = true;
         return point;
       });
 
     this.mouseMove$ = Observable
-      .fromEvent(elementRef.nativeElement, 'mousemove')
+      .fromEvent(elementRef.nativeElement, 'pointermove')
       .share()
-      .map<MouseEvent, Point>(this.mapMouseToScreen.bind(this));
+      .map<any, Point>(this.mapMouseToScreen.bind(this));
 
     this.mouseDrawing$ = this.mouseMove$
       .filter(() => this.mouseIsDown);
 
     this.mouseUp$ = Observable
-      .fromEvent(elementRef.nativeElement, 'mouseup')
+      .fromEvent(elementRef.nativeElement, 'pointerup')
       .share()
-      .map<MouseEvent, Point>(this.mapMouseToScreen.bind(this))
+      .map<any, Point>(this.mapMouseToScreen.bind(this))
       .do((point) => {
         this.mouseIsDown = false;
         return point;
@@ -152,7 +152,6 @@ export class RenderService {
   public onResize() {
     const width = this.elementRef.nativeElement.offsetWidth;
     const height = this.elementRef.nativeElement.offsetHeight;
-    //(0, width, 0, height, 1, 1000);
     this.camera.right = width;
     this.camera.bottom = height;
     this.camera.updateProjectionMatrix();
@@ -165,7 +164,8 @@ export class RenderService {
   public updateGeometry(newGeometry: BufferGeometry | Geometry) {
     if (!this.liveStrokeMesh) {
       this.liveStrokeMesh = new Mesh(newGeometry, new MeshBasicMaterial({
-        color: 0x000000
+        color: 0x000000,
+        side: THREE.FrontSide
       }));
       this.scene.add(this.liveStrokeMesh);
     }
@@ -178,14 +178,16 @@ export class RenderService {
   public updateColor(color: Color) {
     if (!this.liveStrokeMesh) {
       this.liveStrokeMesh = new Mesh(new Geometry(), new MeshBasicMaterial({
-        color: color.getHex()
+        color: color.getHex(),
+        side: THREE.FrontSide
       }));
       this.scene.add(this.liveStrokeMesh);
     }
 
     // this.liveStrokeMesh.material.dispose();
     this.liveStrokeMesh.material = new MeshBasicMaterial({
-      color: color.getHex()
+      color: color.getHex(),
+      side: THREE.FrontSide
     });
     this.render();
   }
