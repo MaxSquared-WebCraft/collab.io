@@ -21,13 +21,11 @@ import 'rxjs/add/operator/do';
 import {ServerSocket} from "./websocket.service";
 
 declare let THREE: any;
-const MAX_POINTS = 1000000;
+const MAX_POINTS = 50000;
 
 @Injectable()
 export class RenderService {
   initialized = false;
-  keyDown$: Observable<any>;
-  mouseZoom$: Observable<any>;
   mouseDown$: Observable<Point>;
   mouseMove$: Observable<Point>;
   mouseDrawing$: Observable<Point>;
@@ -64,7 +62,7 @@ export class RenderService {
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: false,
-      preserveDrawingBuffer: true
+      preserveDrawingBuffer: false
     });
 
     this.renderer.setSize(width, height);
@@ -76,7 +74,11 @@ export class RenderService {
     this.controls.enableZoom = true;
     this.controls.enablePan = true;
     this.controls.enableRotate = false;
+    this.controls.enableDamping = true;
+    this.controls.addEventListener('change', () => this.render());
 
+
+    //filter for left mouse only
     this.mouseDown$ = Observable
       .fromEvent(elementRef.nativeElement, 'pointerdown')
       .share()
@@ -111,21 +113,6 @@ export class RenderService {
         }
       }))
     );
-
-    this.mouseZoom$ = Observable.fromEvent(elementRef.nativeElement, 'wheel').share();
-    this.keyDown$ = Observable.fromEvent(window, 'keydown').share();
-
-
-    this.mouseZoom$
-      .debounceTime(60)
-      .subscribe(
-        () => this.render()
-      );
-
-    this.keyDown$
-      .subscribe(
-        () => this.render()
-      );
 
     this.addStats();
     this.calculateFrame();
@@ -198,9 +185,22 @@ export class RenderService {
   startNewMeshOrGetBufferArray(forceNewMesh: boolean = false) {
     let vertices: any;
 
+    function disposeArray() {
+      this.array = null;
+    }
+
     if (forceNewMesh || !this.liveStrokeMesh) {
-      const geometry = new THREE.BufferGeometry();
+      let geometry = new THREE.BufferGeometry();
+      if (this.liveStrokeMesh) {
+        vertices = this.liveStrokeMesh.geometry.attributes.position.array.slice(0, this.currentIndex);
+        console.log(vertices);
+        geometry.addAttribute('position', new THREE.Float32BufferAttribute(vertices, 3).onUpload(disposeArray));
+      }
+
+      /***************** CREATE NEW ***********************/
+
       vertices = new Float32Array(MAX_POINTS * 3);
+      geometry = new THREE.BufferGeometry();
       geometry.addAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
 
       const material = new MeshBasicMaterial({color: this.currentColor.getHex(), side: THREE.FrontSide});
@@ -209,6 +209,7 @@ export class RenderService {
       this.lastPoint = null;
       this.controlPoint = null;
       this.currentIndex = 0;
+      console.log(this.renderer.info);
       return vertices;
     } else {
       return this.liveStrokeMesh.geometry.attributes.position.array;
