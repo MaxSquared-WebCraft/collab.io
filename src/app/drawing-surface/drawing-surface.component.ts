@@ -1,20 +1,20 @@
 import {AfterViewInit, Component, ElementRef, ViewChild} from '@angular/core';
 import {Color} from 'three';
 import 'rxjs/add/operator/distinctUntilChanged';
-import {Stroke} from "./shared/models/stroke.model";
 import {SimplifyService} from "./shared/services/simplify.service";
 import {RenderService} from "./shared/services/render.service";
 import {Point} from "./shared/models/point.model";
 
+const minDistance = 0.5;
+
 @Component({
   selector: 'mnb-drawing-surface',
   templateUrl: './drawing-surface.component.html',
-  styleUrls: ['./drawing-surface.component.css']
+  styleUrls: ['./drawing-surface.component.scss']
 })
 export class DrawingSurfaceComponent implements AfterViewInit {
   @ViewChild('container')
   private elementRef: ElementRef;
-  private currentStroke: Stroke = new Stroke(new Color(0, 0, 0));
   private currentColor: string;
 
   constructor(private simplifyService: SimplifyService,
@@ -66,5 +66,31 @@ export class DrawingSurfaceComponent implements AfterViewInit {
     return point1.position.x === point2.position.x &&
       point1.position.y === point2.position.y &&
       point1.thickness === point2.thickness;
+  }
+
+  private getSqSegDist(p: Point, p1: Point, p2: Point) {
+    let x = p1.position.x,
+      y = p1.position.y,
+      dx = p2.position.x - x,
+      dy = p2.position.y - y;
+
+    if (dx !== 0 || dy !== 0) {
+
+      let t = ((p.position.x - x) * dx + (p.position.y - y) * dy) / (dx * dx + dy * dy);
+
+      if (t > 1) {
+        x = p2.position.x;
+        y = p2.position.y;
+
+      } else if (t > 0) {
+        x += dx * t;
+        y += dy * t;
+      }
+    }
+
+    dx = p.position.x - x;
+    dy = p.position.y - y;
+
+    return dx * dx + dy * dy;
   }
 }

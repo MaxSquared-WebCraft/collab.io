@@ -11,17 +11,17 @@ import {
 } from 'three';
 import * as Stats from 'stats.js';
 import {ElementRef, Injectable} from '@angular/core';
-import {Point} from '../models/point.model';
+import {ServerSocket} from "./websocket.service";
 import {Observable} from 'rxjs/Observable';
+import {Point} from '../models/point.model';
 import 'rxjs/add/observable/fromEvent';
 import 'rxjs/add/operator/filter';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/do';
-import {ServerSocket} from "./websocket.service";
 
 declare let THREE: any;
-const MAX_POINTS = 50000;
+const MAX_POINTS = 75000;
 
 @Injectable()
 export class RenderService {
@@ -50,10 +50,10 @@ export class RenderService {
     this.serverSocket.connect();
   }
 
-  public init(elementRef: ElementRef) {
+  init(elementRef: ElementRef) {
     this.elementRef = elementRef;
-    const width = this.elementRef.nativeElement.offsetWidth;
-    const height = this.elementRef.nativeElement.offsetHeight;
+    const width = window.innerWidth;
+    const height = window.innerHeight - 120;
 
     this.scene = new THREE.Scene();
     this.camera = new THREE.OrthographicCamera(0, width, 0, height, 1, 1000);
@@ -114,32 +114,30 @@ export class RenderService {
       }))
     );
 
+    Observable.fromEvent(window, 'resize')
+      .subscribe(() => this.onResize());
+
+    this.initialized = true;
+    this.render();
     this.addStats();
     this.calculateFrame();
-    this.initialized = true;
-    setTimeout(() => this.onResize(), 300); // wait till view if fully initialized and fit to screen
-    window.addEventListener('resize', _ => this.onResize());
   }
 
-  public addStats() {
+  addStats() {
     this.stats = <any>new Stats();
-    this.stats.dom.style.position = 'absolute';
-    this.stats.dom.style.top = 56;
-    // this.stats.dom.style.float = 'left';
     this.elementRef.nativeElement.appendChild(this.stats.dom);
-    // document.body.appendChild(this.stats.domElement);
   }
 
-  public calculateFrame() {
+  calculateFrame() {
     this.stats.update();
     this.controls.update();
     // this.render(); //dont render all the time just render when scene changed
     requestAnimationFrame(_ => this.calculateFrame());
   }
 
-  public onResize() {
-    const width = this.elementRef.nativeElement.offsetWidth;
-    const height = this.elementRef.nativeElement.offsetHeight;
+  onResize() {
+    const width = window.innerWidth;
+    const height = window.innerHeight - 120;
     this.camera.right = width;
     this.camera.bottom = height;
     this.camera.updateProjectionMatrix();
@@ -147,9 +145,7 @@ export class RenderService {
     this.render();
   }
 
-  /********************************************/
-
-  public updateColor(color: Color) {
+  updateColor(color: Color) {
     this.currentColor = color;
   }
 
@@ -174,14 +170,6 @@ export class RenderService {
     return new Point(new Vector2(mouse.x, mouse.y), 1);
   }
 
-  /********************************************/
-
-  private render() {
-    this.renderer.render(this.scene, this.camera);
-  }
-
-  /********************************************/
-
   startNewMeshOrGetBufferArray(forceNewMesh: boolean = false) {
     let vertices: any;
 
@@ -192,8 +180,8 @@ export class RenderService {
     if (forceNewMesh || !this.liveStrokeMesh) {
       let geometry = new THREE.BufferGeometry();
       if (this.liveStrokeMesh) {
-        vertices = this.liveStrokeMesh.geometry.attributes.position.array.slice(0, this.currentIndex);
-        console.log(vertices);
+        let tempGeo: any = this.liveStrokeMesh.geometry;
+        vertices = tempGeo.attributes.position.array.slice(0, this.currentIndex);
         geometry.addAttribute('position', new THREE.Float32BufferAttribute(vertices, 3).onUpload(disposeArray));
       }
 
@@ -212,11 +200,20 @@ export class RenderService {
       console.log(this.renderer.info);
       return vertices;
     } else {
-      return this.liveStrokeMesh.geometry.attributes.position.array;
+      let tempGeo: any = this.liveStrokeMesh.geometry;
+      return tempGeo.attributes.position.array;
     }
   }
 
   updateGeometry(point: Point, newStroke: boolean = false): void {
+    function perp(vec: Vector2): Vector2 {
+      const vector = new Vector2(0);
+      const tmp = vec.y;
+      vector.y = -vec.x;
+      vector.x = tmp;
+      return vector;
+    }
+
     const vertices: any = this.startNewMeshOrGetBufferArray(newStroke);
 
     if (!this.lastPoint) {
@@ -267,7 +264,7 @@ export class RenderService {
 
       let A, B, C, D: Vector2;
       const dir = new Vector2().subVectors(currentPoint, lastPoint);
-      const perpendicular = this.perp(dir).normalize();
+      const perpendicular = perp(dir).normalize();
 
       if (this.newLine) {
         A = new Vector2().subVectors(lastPoint.clone(), perpendicular.clone().multiplyScalar(lastPressure));
@@ -317,16 +314,15 @@ export class RenderService {
     this.controlPoint = point;
     this.lastPoint = temp;
 
-    this.liveStrokeMesh.geometry.setDrawRange(0, this.currentIndex);
-    this.liveStrokeMesh.geometry.attributes.position.needsUpdate = true;
+    const tempGeo: any = this.liveStrokeMesh.geometry;
+
+    tempGeo.setDrawRange(0, this.currentIndex);
+    tempGeo.attributes.position.needsUpdate = true;
     this.render();
   }
 
-  private perp(vec: Vector2): Vector2 {
-    const vector = new Vector2(0);
-    const tmp = vec.y;
-    vector.y = -vec.x;
-    vector.x = tmp;
-    return vector;
+  private render() {
+    this.renderer.render(this.scene, this.camera);
   }
+
 }
