@@ -32,4 +32,5 @@ import {DrawingSurfaceUserIndicatorComponent} from "./drawing-surface/drawing-su
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+}

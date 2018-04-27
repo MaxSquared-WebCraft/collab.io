@@ -1,3 +1,5 @@
+import {fromEvent as observableFromEvent, Observable} from 'rxjs';
+import {filter, map, share, tap} from 'rxjs/operators';
 import {
   Color,
   Mesh,
@@ -12,13 +14,7 @@ import {
 import * as Stats from 'stats.js';
 import {ElementRef, Injectable} from '@angular/core';
 import {ServerSocket} from "./websocket.service";
-import {Observable} from 'rxjs/Observable';
 import {Point} from '../models/point.model';
-import 'rxjs/add/observable/fromEvent';
-import 'rxjs/add/operator/filter';
-import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/debounceTime';
-import 'rxjs/add/operator/do';
 
 declare let THREE: any;
 const MAX_POINTS = 75000;
@@ -77,33 +73,32 @@ export class RenderService {
     this.controls.enableDamping = true;
     this.controls.addEventListener('change', () => this.render());
 
-
     //filter for left mouse only
-    this.mouseDown$ = Observable
-      .fromEvent(elementRef.nativeElement, 'pointerdown')
-      .share()
-      .map<any, Point>(this.mapMouseToScreen.bind(this))
-      .do((point) => {
+    this.mouseDown$ = observableFromEvent(elementRef.nativeElement, 'pointerdown').pipe(
+      share(),
+      map<any, Point>(this.mapMouseToScreen.bind(this)),
+      tap((point) => {
         this.mouseIsDown = true;
         return point;
-      });
+      })
+    );
 
-    this.mouseMove$ = Observable
-      .fromEvent(elementRef.nativeElement, 'pointermove')
-      .share()
-      .map<any, Point>(this.mapMouseToScreen.bind(this));
+    this.mouseMove$ = observableFromEvent(elementRef.nativeElement, 'pointermove').pipe(
+      share(),
+      map<any, Point>(this.mapMouseToScreen.bind(this))
+    );
 
-    this.mouseDrawing$ = this.mouseMove$
-      .filter(() => this.mouseIsDown);
+    this.mouseDrawing$ = this.mouseMove$.pipe(
+      filter(() => this.mouseIsDown));
 
-    this.mouseUp$ = Observable
-      .fromEvent(elementRef.nativeElement, 'pointerup')
-      .share()
-      .map<any, Point>(this.mapMouseToScreen.bind(this))
-      .do((point) => {
+    this.mouseUp$ = observableFromEvent(elementRef.nativeElement, 'pointerup').pipe(
+      share(),
+      map<any, Point>(this.mapMouseToScreen.bind(this)),
+      tap((point) => {
         this.mouseIsDown = false;
         return point;
-      });
+      })
+    );
 
     this.mouseMove$.subscribe(
       (point: Point) => this.serverSocket.send(JSON.stringify({
@@ -114,8 +109,7 @@ export class RenderService {
       }))
     );
 
-    Observable.fromEvent(window, 'resize')
-      .subscribe(() => this.onResize());
+    observableFromEvent(window, 'resize').subscribe(() => this.onResize());
 
     this.initialized = true;
     this.render();

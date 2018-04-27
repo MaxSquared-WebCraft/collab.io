@@ -1,5 +1,5 @@
 import {Component, OnInit, Output} from '@angular/core';
-import {BehaviorSubject} from 'rxjs/BehaviorSubject';
+import {BehaviorSubject} from 'rxjs';
 
 @Component({
   selector: 'mnb-drawing-surface-tool',
