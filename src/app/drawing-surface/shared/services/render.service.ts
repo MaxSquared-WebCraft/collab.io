@@ -1,6 +1,7 @@
 import {fromEvent as observableFromEvent, Observable} from 'rxjs';
 import {filter, map, share, tap} from 'rxjs/operators';
 import {
+  BufferAttribute,
   Color,
   Mesh,
   MeshBasicMaterial,
@@ -17,7 +18,7 @@ import {ServerSocket} from "./websocket.service";
 import {Point} from '../models/point.model';
 
 declare let THREE: any;
-const MAX_POINTS = 75000;
+const MAX_POINTS = 25000;
 
 @Injectable()
 export class RenderService {
@@ -35,11 +36,10 @@ export class RenderService {
   private elementRef: ElementRef;
   private liveStrokeMesh: Mesh;
   private currentIndex = 0;
+  private verticesCount = 0;
   private lastPoint;
   private controlPoint;
   private newLine = false;
-  private oldA: Vector2;
-  private oldB: Vector2;
   private currentColor = new Color(0x000000);
 
   constructor(private serverSocket: ServerSocket) {
@@ -118,8 +118,9 @@ export class RenderService {
   }
 
   addStats() {
-    this.stats = <any>new Stats();
+    this.stats = new Stats();
     this.elementRef.nativeElement.appendChild(this.stats.dom);
+
   }
 
   calculateFrame() {
@@ -166,6 +167,7 @@ export class RenderService {
 
   startNewMeshOrGetBufferArray(forceNewMesh: boolean = false) {
     let vertices: any;
+    let indices: any;
 
     function disposeArray() {
       this.array = null;
@@ -176,26 +178,32 @@ export class RenderService {
       if (this.liveStrokeMesh) {
         let tempGeo: any = this.liveStrokeMesh.geometry;
         vertices = tempGeo.attributes.position.array.slice(0, this.currentIndex);
-        geometry.addAttribute('position', new THREE.Float32BufferAttribute(vertices, 3).onUpload(disposeArray));
+        indices = tempGeo.index.array.slice(0, this.verticesCount);
+        geometry.index = new BufferAttribute(indices, 1);
+        geometry.addAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));// .onUpload(disposeArray));
       }
 
       /***************** CREATE NEW ***********************/
 
       vertices = new Float32Array(MAX_POINTS * 3);
+      indices = new Uint32Array(MAX_POINTS * 3);
       geometry = new THREE.BufferGeometry();
+      geometry.index = new BufferAttribute(indices, 1);
       geometry.addAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+      geometry.setDrawRange(0, 0);
 
-      const material = new MeshBasicMaterial({color: this.currentColor.getHex(), side: THREE.FrontSide});
+      const material = new MeshBasicMaterial({color: this.currentColor.getHex()});
       this.liveStrokeMesh = new Mesh(geometry, material);
       this.scene.add(this.liveStrokeMesh);
       this.lastPoint = null;
       this.controlPoint = null;
       this.currentIndex = 0;
-      console.log(this.renderer.info);
-      return vertices;
+      this.verticesCount = 0;
+      // console.log(this.renderer.info);
+      return {vertices, indices};
     } else {
       let tempGeo: any = this.liveStrokeMesh.geometry;
-      return tempGeo.attributes.position.array;
+      return {vertices: tempGeo.attributes.position.array, indices: tempGeo.index.array};
     }
   }
 
@@ -208,7 +216,10 @@ export class RenderService {
       return vector;
     }
 
-    const vertices: any = this.startNewMeshOrGetBufferArray(newStroke);
+    let obj = this.startNewMeshOrGetBufferArray(newStroke);
+
+    const vertices: any = obj.vertices || [];
+    const indices: any = obj.indices || [];
 
     if (!this.lastPoint) {
       this.lastPoint = point;
@@ -231,7 +242,7 @@ export class RenderService {
 
     const segmentDistance = 2;
     const distance = midPoint1.distanceTo(midPoint2);
-    const numberOfSegments = Math.min(16, Math.max(Math.floor(distance / segmentDistance), 32));
+    const numberOfSegments = Math.max(Math.floor(distance / segmentDistance), 8);
 
     let t = 0.0;
     const step = 1.0 / numberOfSegments;
@@ -265,43 +276,56 @@ export class RenderService {
         B = lastPoint.clone().add(perpendicular.clone().multiplyScalar(lastPressure));
         C = currentPoint.clone().add(perpendicular.clone().multiplyScalar(currentPressure));
         D = new Vector2().subVectors(currentPoint.clone(), perpendicular.clone().multiplyScalar(currentPressure));
-
-        this.oldA = D;
-        this.oldB = C;
         this.newLine = false;
+
+        vertices[this.currentIndex++] = A.x;
+        vertices[this.currentIndex++] = A.y;
+        vertices[this.currentIndex++] = 2;
+
+        vertices[this.currentIndex++] = B.x;
+        vertices[this.currentIndex++] = B.y;
+        vertices[this.currentIndex++] = 2;
+
+        vertices[this.currentIndex++] = C.x;
+        vertices[this.currentIndex++] = C.y;
+        vertices[this.currentIndex++] = 2;
+
+        vertices[this.currentIndex++] = D.x;
+        vertices[this.currentIndex++] = D.y;
+        vertices[this.currentIndex++] = 2;
+
+        let vertCount = this.currentIndex / 3 - 4;
+
+        indices[this.verticesCount++] = vertCount + 1;  // 1
+        indices[this.verticesCount++] = vertCount + 2;  // 2
+        indices[this.verticesCount++] = vertCount;      // 0
+
+        indices[this.verticesCount++] = vertCount;  // 0
+        indices[this.verticesCount++] = vertCount + 2;  // 2
+        indices[this.verticesCount++] = vertCount + 3;  // 3
+
       } else {
-        A = this.oldA;
-        B = this.oldB;
         C = currentPoint.clone().add(perpendicular.clone().multiplyScalar(currentPressure));
         D = new Vector2().subVectors(currentPoint.clone(), perpendicular.clone().multiplyScalar(currentPressure));
 
-        this.oldA = D;
-        this.oldB = C;
+        vertices[this.currentIndex++] = C.x;
+        vertices[this.currentIndex++] = C.y;
+        vertices[this.currentIndex++] = 2;
+
+        vertices[this.currentIndex++] = D.x;
+        vertices[this.currentIndex++] = D.y;
+        vertices[this.currentIndex++] = 2;
+
+        let vertCount = this.currentIndex / 3 - 4;
+
+        indices[this.verticesCount++] = vertCount + 1;  // 1
+        indices[this.verticesCount++] = vertCount;      // 0
+        indices[this.verticesCount++] = vertCount + 2;  // 2
+
+        indices[this.verticesCount++] = vertCount + 2;  // 2
+        indices[this.verticesCount++] = vertCount + 3;  // 3
+        indices[this.verticesCount++] = vertCount + 1;  // 0
       }
-
-      vertices[this.currentIndex++] = A.x;
-      vertices[this.currentIndex++] = A.y;
-      vertices[this.currentIndex++] = 2;
-
-      vertices[this.currentIndex++] = B.x;
-      vertices[this.currentIndex++] = B.y;
-      vertices[this.currentIndex++] = 2;
-
-      vertices[this.currentIndex++] = C.x;
-      vertices[this.currentIndex++] = C.y;
-      vertices[this.currentIndex++] = 2;
-
-      vertices[this.currentIndex++] = C.x;
-      vertices[this.currentIndex++] = C.y;
-      vertices[this.currentIndex++] = 2;
-
-      vertices[this.currentIndex++] = D.x;
-      vertices[this.currentIndex++] = D.y;
-      vertices[this.currentIndex++] = 2;
-
-      vertices[this.currentIndex++] = A.x;
-      vertices[this.currentIndex++] = A.y;
-      vertices[this.currentIndex++] = 2;
     }
 
     const temp = this.controlPoint;
@@ -311,6 +335,7 @@ export class RenderService {
     const tempGeo: any = this.liveStrokeMesh.geometry;
 
     tempGeo.setDrawRange(0, this.currentIndex);
+    tempGeo.getIndex().needsUpdate = true;
     tempGeo.attributes.position.needsUpdate = true;
     this.render();
   }
@@ -318,5 +343,4 @@ export class RenderService {
   private render() {
     this.renderer.render(this.scene, this.camera);
   }
-
 }
