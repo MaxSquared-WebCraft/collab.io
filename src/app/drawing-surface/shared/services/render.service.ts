@@ -187,13 +187,16 @@ export class RenderService {
 
       vertices = new Float32Array(MAX_POINTS * 3);
       indices = new Uint32Array(MAX_POINTS * 3);
+
       geometry = new THREE.BufferGeometry();
       geometry.index = new BufferAttribute(indices, 1);
       geometry.addAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
       geometry.setDrawRange(0, 0);
+      this.liveStrokeMesh = new Mesh(geometry, new MeshBasicMaterial({
+        color: this.currentColor.getHex(),
+        side: THREE.FrontFace
+      }));
 
-      const material = new MeshBasicMaterial({color: this.currentColor.getHex()});
-      this.liveStrokeMesh = new Mesh(geometry, material);
       this.scene.add(this.liveStrokeMesh);
       this.lastPoint = null;
       this.controlPoint = null;
