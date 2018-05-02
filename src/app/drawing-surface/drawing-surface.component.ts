@@ -52,7 +52,7 @@ export class DrawingSurfaceComponent implements AfterViewInit {
     // const oldPointCount = this.currentStroke.points.length;
     // this.currentStroke.points = this.simplifyService.simplify(this.currentStroke.points, 0.5);
     // console.log('Points reduced from ' + oldPointCount + ' to ' + this.currentStroke.points.length);
-    this.renderService.updateGeometry(point);
+    this.renderService.updateGeometry(point, false, true);
   }
 
   comparer(point1: Point, point2: Point) {
