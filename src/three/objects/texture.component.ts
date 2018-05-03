@@ -1,4 +1,4 @@
-import { Directive, Input } from '@angular/core';
+import {Directive, Input} from '@angular/core';
 import * as THREE from 'three';
 
 @Directive({ selector: 'three-texture' })
@@ -43,7 +43,7 @@ export class TextureComponent {
         side: THREE.BackSide
       });
 
-      this.object = new THREE.Mesh(geometry, material);
+      this.mesh = new THREE.Mesh(geometry, material);
       */
     };
   }

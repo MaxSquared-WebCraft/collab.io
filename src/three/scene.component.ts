@@ -1,15 +1,15 @@
-import { Directive, ContentChild, ContentChildren } from '@angular/core';
+import {AfterContentInit, ContentChild, ContentChildren, Directive} from '@angular/core';
 import * as THREE from 'three';
 
-import { PerspectiveCameraComponent } from './cameras/perspective-camera.component';
-import { PointLightComponent } from './lights/point-light.component';
+import {PerspectiveCameraComponent} from './cameras/perspective-camera.component';
+import {PointLightComponent} from './lights/point-light.component';
 
-import { SphereComponent } from './objects/sphere.component';
-import { TextureComponent } from './objects/texture.component';
-import { SkyboxComponent } from './objects/skybox.component';
+import {SphereComponent} from './objects/sphere.component';
+import {TextureComponent} from './objects/texture.component';
+import {SkyboxComponent} from './objects/skybox.component';
 
 @Directive({ selector: 'three-scene' })
-export class SceneComponent {
+export class SceneComponent implements AfterContentInit {
 
   @ContentChild(PerspectiveCameraComponent) cameraComp: any;
   @ContentChildren(PointLightComponent) lightComps: any;
@@ -35,10 +35,10 @@ export class SceneComponent {
       ...this.textureComps.toArray()
     ];
 
-    for(let mesh of meshes) {
-      if(mesh.object) {
+    for (const mesh of meshes) {
+      if (mesh.object) {
         this.scene.add(mesh.object);
-      } else if(mesh.attachScene) {
+      } else if (mesh.attachScene) {
         mesh.attachScene(this.scene);
       }
     }

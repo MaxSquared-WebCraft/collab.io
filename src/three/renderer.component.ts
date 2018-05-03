@@ -1,11 +1,11 @@
-import { Directive, ElementRef, Input, ContentChild } from '@angular/core';
+import {AfterContentInit, ContentChild, Directive, ElementRef, Input, OnChanges} from '@angular/core';
 import * as THREE from 'three';
 
-import { SceneComponent } from './scene.component';
-import { OrbitControlsComponent } from './controls/orbit.component';
+import {SceneComponent} from './scene.component';
+import {OrbitControlsComponent} from './controls/orbit.component';
 
 @Directive({ selector: 'three-renderer' })
-export class RendererComponent {
+export class RendererComponent implements OnChanges, AfterContentInit {
 
   @Input() height: number;
   @Input() width: number;
@@ -26,14 +26,17 @@ export class RendererComponent {
     return this.sceneComp.camera;
   }
 
+  get nativeElement() {
+    return this.element.nativeElement;
+  }
+
   constructor(private element: ElementRef) {
   }
 
   ngOnChanges(changes) {
-
     const widthChng = changes.width && changes.width.currentValue;
     const heightChng = changes.height && changes.height.currentValue;
-    if(widthChng || heightChng) {
+    if (widthChng || heightChng) {
       this.renderer.setSize(this.width, this.height);
     }
   }
