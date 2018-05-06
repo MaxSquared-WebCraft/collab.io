@@ -43,7 +43,7 @@ export class TextureComponent {
         side: THREE.BackSide
       });
 
-      this.mesh = new THREE.Mesh(geometry, material);
+      this.object = new THREE.Mesh(geometry, material);
       */
     };
   }

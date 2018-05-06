@@ -1,7 +1,6 @@
 import {AfterContentInit, Component, HostListener, Input, OnChanges, OnInit, ViewChild} from '@angular/core';
 import {fromEvent as observableFromEvent, Observable} from 'rxjs';
 import {filter, map, share, tap} from 'rxjs/operators';
-import {Observable} from 'rxjs/Observable';
 import {Point} from '../utils/point.model';
 import {Vector2, Vector3} from 'three';
 import {RendererComponent} from './renderer.component';
@@ -11,11 +10,11 @@ import {RendererComponent} from './renderer.component';
   template: `
     <three-renderer [height]="height" [width]="width">
       <three-orbit-controls></three-orbit-controls>
-      <three-scene>
-        <three-perspective-camera [height]="height" [width]="width" [positions]="[-50, 0, 0]"></three-perspective-camera>
-        <three-point-light></three-point-light>
-        <three-sphere></three-sphere>
-        <three-skybox></three-skybox>
+      <three-scene [meshesUpdated]="mouseDown$">
+        <three-orthographic-camera [height]="height" [width]="width" [positions]="[-50, 0, 0]"></three-orthographic-camera>
+        <!--<three-point-light></three-point-light>-->
+        <three-stroke [strokeInput]="mouseDrawing$"></three-stroke>
+        <!--<three-skybox></three-skybox>-->
       </three-scene>
     </three-renderer>
   `
@@ -69,9 +68,6 @@ export class ThreeComponent implements OnInit, AfterContentInit, OnChanges {
 
     this.mouseMove$ = observableFromEvent(this.canvas.nativeElement, 'pointermove').pipe(
       share(),
-      tap((point) => {
-        console.log(point);
-      }),
       map<any, Point>((e: PointerEvent) => this.mapMouseToScreen(e))
     );
 

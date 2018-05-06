@@ -15,7 +15,9 @@ export class RendererComponent implements OnChanges, AfterContentInit {
   @ContentChild(OrbitControlsComponent) orbitComponent: OrbitControlsComponent;
 
   renderer: THREE.WebGLRenderer = new THREE.WebGLRenderer({
-    antialias: true
+    antialias: true,
+    alpha: false,
+    preserveDrawingBuffer: false
   });
 
   get scene() {
@@ -43,6 +45,7 @@ export class RendererComponent implements OnChanges, AfterContentInit {
 
   ngAfterContentInit() {
     this.renderer.setSize(this.width, this.height);
+    this.renderer.setClearColor(0xFFFFFF);
     this.element.nativeElement.appendChild(this.renderer.domElement);
     this.renderer.setPixelRatio(Math.floor(window.devicePixelRatio));
     this.orbitComponent.setupControls(this.camera, this.renderer);

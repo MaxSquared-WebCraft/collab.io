@@ -1,20 +1,23 @@
-import {Directive, OnInit} from '@angular/core';
+import {Directive, Input, OnInit} from '@angular/core';
 import * as THREE from 'three';
 import {BufferAttribute, Color, Mesh, MeshBasicMaterial, Vector2} from 'three';
 import {Point} from '../../utils/point.model';
+import {Observable} from 'rxjs/Observable';
 
 const MAX_POINTS = 25000;
 
-@Directive({selector: 'three-sphere'})
-export class SphereComponent implements OnInit {
+@Directive({selector: 'three-stroke'})
+export class StrokeComponent implements OnInit {
 
-  mesh: THREE.Mesh;
+  object: THREE.Mesh;
   debugMesh: THREE.Mesh;
+
+  @Input() strokeInput: Observable<Point>;
 
   private verticesIdx = 0;
   private indicesIdx = 0;
   private verticesCount = 0;
-  private currentColor = new Color(0x000000);
+  private currentColor = new Color(0xFF0000);
   private finalized = false;
   private new = true;
 
@@ -27,7 +30,13 @@ export class SphereComponent implements OnInit {
     // const material = new THREE.MeshNormalMaterial();
     // const sphere = new THREE.Mesh(geometry, material);
     //
-    // this.mesh = sphere;
+    // this.object = sphere;
+    this.strokeInput.subscribe(
+      (point: Point) => this.updateGeometry(point),
+      (error: any) => {
+      },
+      () => this.updateGeometry(this.lastPoint, true)
+    );
   }
 
   updateGeometry(point: Point, strokeEnd: boolean = false): void {
@@ -157,7 +166,7 @@ export class SphereComponent implements OnInit {
       this.lastPoint = temp;
     }
 
-    const tempGeo: any = this.mesh.geometry;
+    const tempGeo: any = this.object.geometry;
     tempGeo.getIndex().needsUpdate = true;
     tempGeo.attributes.position.needsUpdate = true;
     tempGeo.setDrawRange(0, this.verticesIdx);
@@ -239,7 +248,7 @@ export class SphereComponent implements OnInit {
       return;
     }
 
-    const tempGeo: any = this.mesh.geometry;
+    const tempGeo: any = this.object.geometry;
     const vertices = tempGeo.attributes.position.array.slice(0, this.verticesIdx);
     const indices = tempGeo.index.array.slice(0, this.indicesIdx);
     tempGeo.index = new BufferAttribute(indices, 1);
@@ -252,7 +261,7 @@ export class SphereComponent implements OnInit {
     let vertices: any;
     let indices: any;
 
-    if (!this.mesh) {
+    if (!this.object) {
       vertices = new Float32Array(MAX_POINTS * 3);
       indices = new Uint32Array(MAX_POINTS * 3); // TODO: Try with UInt16
 
@@ -261,7 +270,7 @@ export class SphereComponent implements OnInit {
       geometry.addAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
       geometry.setDrawRange(0, 0);
 
-      this.mesh = new Mesh(geometry, new MeshBasicMaterial({
+      this.object = new Mesh(geometry, new MeshBasicMaterial({
         color: this.currentColor.getHex(), // TODO: Get color from tools service
         side: THREE.FrontSide
       }));
@@ -270,7 +279,7 @@ export class SphereComponent implements OnInit {
 
       return {vertices, indices};
     } else {
-      const tempGeo: any = this.mesh.geometry;
+      const tempGeo: any = this.object.geometry;
 
       // if (environment.debug) {
       //   const edges = new WireframeGeometry(tempGeo.clone());

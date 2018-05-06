@@ -1,22 +1,17 @@
-import {AfterContentInit, ContentChild, ContentChildren, Directive} from '@angular/core';
+import {AfterContentInit, ContentChild, ContentChildren, Directive, Input} from '@angular/core';
 import * as THREE from 'three';
 
-import {PerspectiveCameraComponent} from './cameras/perspective-camera.component';
-import {PointLightComponent} from './lights/point-light.component';
-
-import {SphereComponent} from './objects/sphere.component';
-import {TextureComponent} from './objects/texture.component';
-import {SkyboxComponent} from './objects/skybox.component';
+import {StrokeComponent} from './objects/stroke-component.directive';
+import {OrthograpicCameraDirective} from './cameras/orthograpic-camera-component.directive';
+import {Observable} from 'rxjs/Observable';
 
 @Directive({ selector: 'three-scene' })
 export class SceneComponent implements AfterContentInit {
 
-  @ContentChild(PerspectiveCameraComponent) cameraComp: any;
-  @ContentChildren(PointLightComponent) lightComps: any;
+  @Input() meshesUpdated: Observable<void>;
 
-  @ContentChildren(SphereComponent) sphereComps: any;
-  @ContentChildren(TextureComponent) textureComps: any;
-  @ContentChild(SkyboxComponent) skyboxComp: any;
+  @ContentChild(OrthograpicCameraDirective) cameraComp: any;
+  @ContentChildren(StrokeComponent) sphereComps: any;
 
   scene: THREE.Scene = new THREE.Scene();
 
@@ -29,19 +24,33 @@ export class SceneComponent implements AfterContentInit {
     this.scene.add(this.camera);
 
     const meshes = [
-      this.skyboxComp,
-      ...this.lightComps.toArray(),
       ...this.sphereComps.toArray(),
-      ...this.textureComps.toArray()
     ];
 
     for (const mesh of meshes) {
-      if (mesh.object) {
+      if (mesh && mesh.object) {
         this.scene.add(mesh.object);
-      } else if (mesh.attachScene) {
+      } else if (mesh && mesh.attachScene) {
+        mesh.attachScene(this.scene);
+      }
+    }
+
+    this.meshesUpdated.subscribe(
+      () => this.queryForUpdates()
+    );
+  }
+
+  queryForUpdates(): void {
+    const meshes = [
+      ...this.sphereComps.toArray(),
+    ];
+
+    for (const mesh of meshes) {
+      if (mesh && mesh.object) {
+        this.scene.add(mesh.object);
+      } else if (mesh && mesh.attachScene) {
         mesh.attachScene(this.scene);
       }
     }
   }
-
 }
