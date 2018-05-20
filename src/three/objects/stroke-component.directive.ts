@@ -8,7 +8,7 @@ import {Subject} from 'rxjs/Subject';
 const MAX_POINTS = 25000;
 
 @Directive({selector: 'three-stroke'})
-export class StrokeComponentDirective implements OnInit {
+export class StrokeComponent implements OnInit {
   object: THREE.Mesh;
   debugMesh: THREE.Mesh;
 
