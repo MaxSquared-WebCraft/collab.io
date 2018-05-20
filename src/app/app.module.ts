@@ -1,15 +1,13 @@
-import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
+import {NgModule} from '@angular/core';
+import {BrowserModule} from '@angular/platform-browser';
 
-import { AppComponent } from './app.component';
-import { MusicService } from './services/music.service';
-
-import { ThreeModule } from '../three/three.module';
+import {AppComponent} from './app.component';
+import {ThreeModule} from '../three/three.module';
 
 @NgModule({
   declarations: [AppComponent],
   imports: [BrowserModule, ThreeModule],
-  providers: [MusicService],
+  providers: [],
   bootstrap: [AppComponent]
 })
 export class AppModule {

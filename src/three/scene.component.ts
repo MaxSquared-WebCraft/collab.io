@@ -11,7 +11,7 @@ export class SceneComponent implements AfterContentInit {
   @Input() meshesUpdated: Observable<void>;
 
   @ContentChild(OrthograpicCameraDirective) cameraComp: any;
-  @ContentChildren(StrokeComponent) sphereComps: any;
+  @ContentChildren(StrokeComponent) strokeComps: any;
 
   scene: THREE.Scene = new THREE.Scene();
 
@@ -24,7 +24,7 @@ export class SceneComponent implements AfterContentInit {
     this.scene.add(this.camera);
 
     const meshes = [
-      ...this.sphereComps.toArray(),
+      ...this.strokeComps.toArray(),
     ];
 
     for (const mesh of meshes) {
@@ -42,7 +42,7 @@ export class SceneComponent implements AfterContentInit {
 
   queryForUpdates(): void {
     const meshes = [
-      ...this.sphereComps.toArray(),
+      ...this.strokeComps.toArray(),
     ];
 
     for (const mesh of meshes) {

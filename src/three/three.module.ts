@@ -9,7 +9,7 @@ import {PointLightComponent} from './lights/point-light.component';
 
 import {OrbitControlsComponent} from './controls/orbit.component';
 
-import {StrokeComponent} from './objects/stroke-component.directive';
+import {StrokeComponentDirective} from './objects/stroke-component.directive';
 import {TextureComponent} from './objects/texture.component';
 import {SkyboxComponent} from './objects/skybox.component';
 import {OrthograpicCameraDirective} from './cameras/orthograpic-camera-component.directive';
@@ -21,7 +21,7 @@ import {OrthograpicCameraDirective} from './cameras/orthograpic-camera-component
     SceneComponent,
     OrthograpicCameraDirective,
     PointLightComponent,
-    StrokeComponent,
+    StrokeComponentDirective,
     TextureComponent,
     SkyboxComponent,
     OrbitControlsComponent

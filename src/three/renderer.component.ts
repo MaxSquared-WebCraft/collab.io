@@ -1,8 +1,11 @@
 import {AfterContentInit, ContentChild, Directive, ElementRef, Input, OnChanges} from '@angular/core';
 import * as THREE from 'three';
 
+
 import {SceneComponent} from './scene.component';
 import {OrbitControlsComponent} from './controls/orbit.component';
+import {Subject} from 'rxjs/Subject';
+import {Point} from '../utils/point.model';
 
 @Directive({ selector: 'three-renderer' })
 export class RendererComponent implements OnChanges, AfterContentInit {
@@ -10,6 +13,7 @@ export class RendererComponent implements OnChanges, AfterContentInit {
   @Input() height: number;
   @Input() width: number;
   @Input() isVRMode = false;
+  @Input() updateCallback$: Subject<Point>;
 
   @ContentChild(SceneComponent) sceneComp: SceneComponent;
   @ContentChild(OrbitControlsComponent) orbitComponent: OrbitControlsComponent;
@@ -19,6 +23,7 @@ export class RendererComponent implements OnChanges, AfterContentInit {
     alpha: false,
     preserveDrawingBuffer: false
   });
+
 
   get scene() {
     return this.sceneComp.scene;
@@ -50,13 +55,18 @@ export class RendererComponent implements OnChanges, AfterContentInit {
     this.renderer.setPixelRatio(Math.floor(window.devicePixelRatio));
     this.orbitComponent.setupControls(this.camera, this.renderer);
 
+    this.updateCallback$.subscribe(
+      () => this.renderer.render(this.scene, this.camera)
+    );
+
     this.render();
+    this.renderer.render(this.scene, this.camera);
   }
 
   render() {
     this.orbitComponent.updateControls(this.scene, this.camera);
     this.camera.lookAt(this.scene.position);
-    this.renderer.render(this.scene, this.camera);
+    // this.renderer.render(this.scene, this.camera);
 
     requestAnimationFrame(() => this.render());
   }

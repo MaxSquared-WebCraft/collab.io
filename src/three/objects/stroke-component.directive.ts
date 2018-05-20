@@ -3,16 +3,17 @@ import * as THREE from 'three';
 import {BufferAttribute, Color, Mesh, MeshBasicMaterial, Vector2} from 'three';
 import {Point} from '../../utils/point.model';
 import {Observable} from 'rxjs/Observable';
+import {Subject} from 'rxjs/Subject';
 
 const MAX_POINTS = 25000;
 
 @Directive({selector: 'three-stroke'})
-export class StrokeComponent implements OnInit {
-
+export class StrokeComponentDirective implements OnInit {
   object: THREE.Mesh;
   debugMesh: THREE.Mesh;
 
-  @Input() strokeInput: Observable<Point>;
+  @Input() strokeInput$: Observable<Point>;
+  @Input() updateCallback$: Subject<Point>;
 
   private verticesIdx = 0;
   private indicesIdx = 0;
@@ -25,16 +26,9 @@ export class StrokeComponent implements OnInit {
   private controlPoint: Point;
 
   ngOnInit() {
-    // Create sphere
-    // const geometry = new THREE.SphereGeometry(3, 250, 250);
-    // const material = new THREE.MeshNormalMaterial();
-    // const sphere = new THREE.Mesh(geometry, material);
-    //
-    // this.object = sphere;
-    this.strokeInput.subscribe(
+    this.strokeInput$.subscribe(
       (point: Point) => this.updateGeometry(point),
-      (error: any) => {
-      },
+      null,
       () => this.updateGeometry(this.lastPoint, true)
     );
   }
@@ -74,7 +68,7 @@ export class StrokeComponent implements OnInit {
       let t = 0.0;
       const step = 1.0 / numberOfSegments;
       for (let j = 0; j < numberOfSegments; j++) {
-        const newPoint = new Point(new Vector2(0, 0), 0.1);
+        const newPoint = new Point(0, 0, new Vector2(0, 0), 0.1);
 
         newPoint.position = midPoint1.clone().multiplyScalar(Math.pow(1 - t, 2))
           .add(prev1.position.clone().multiplyScalar(2.0 * (1 - t) * t))
@@ -170,7 +164,7 @@ export class StrokeComponent implements OnInit {
     tempGeo.getIndex().needsUpdate = true;
     tempGeo.attributes.position.needsUpdate = true;
     tempGeo.setDrawRange(0, this.verticesIdx);
-    // TODO: queue render call using observable or service
+    this.updateCallback$.next();
   }
 
   createPoint(lastPoint: Point, point: Point, vertices: any[], indices: any[]) {

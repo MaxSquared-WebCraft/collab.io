@@ -26,7 +26,7 @@ export class Stroke {
         let t = 0.0;
         const step = 1.0 / numberOfSegments;
         for (let j = 0; j < numberOfSegments; j++) {
-          const newPoint = new Point(new Vector2(0, 0), 0.1);
+          const newPoint = new Point(0, 0, new Vector2(0, 0), 0.1);
 
           newPoint.position = midPoint1.clone().multiplyScalar(Math.pow(1 - t, 2))
             .add(prev1.position.clone().multiplyScalar(2.0 * (1 - t) * t))

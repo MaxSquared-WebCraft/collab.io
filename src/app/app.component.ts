@@ -1,7 +1,5 @@
-import {Component, ElementRef } from '@angular/core';
-
-import { MusicService } from './services/music.service';
-import { requestFullScreen } from '../utils/fullscreen';
+import {Component, ElementRef} from '@angular/core';
+import {requestFullScreen} from '../utils/fullscreen';
 import './app.scss';
 
 @Component({
@@ -13,8 +11,7 @@ export class AppComponent {
   audioData: any;
   isFullScreen = false;
 
-  constructor(private musicSvc: MusicService,
-              private element: ElementRef) {
+  constructor(private element: ElementRef) {
   }
 
   toggleFullScreen() {
