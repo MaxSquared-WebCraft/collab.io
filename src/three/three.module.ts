@@ -5,13 +5,8 @@ import {ThreeComponent} from './three.component';
 import {RendererComponent} from './renderer.component';
 import {SceneComponent} from './scene.component';
 
-import {PointLightComponent} from './lights/point-light.component';
-
 import {OrbitControlsComponent} from './controls/orbit.component';
-
 import {StrokeComponent} from './objects/stroke-component.directive';
-import {TextureComponent} from './objects/texture.component';
-import {SkyboxComponent} from './objects/skybox.component';
 import {OrthograpicCameraDirective} from './cameras/orthograpic-camera-component.directive';
 
 @NgModule({
@@ -20,10 +15,7 @@ import {OrthograpicCameraDirective} from './cameras/orthograpic-camera-component
     RendererComponent,
     SceneComponent,
     OrthograpicCameraDirective,
-    PointLightComponent,
     StrokeComponent,
-    TextureComponent,
-    SkyboxComponent,
     OrbitControlsComponent
   ],
   imports: [BrowserModule],

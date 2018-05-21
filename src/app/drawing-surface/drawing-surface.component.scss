@@ -1,0 +1,8 @@
+.content-container {
+  cursor: crosshair;
+  & > div {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+}

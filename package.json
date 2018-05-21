@@ -21,6 +21,9 @@
     "@angular/platform-browser": "^6.0.2",
     "@angular/platform-browser-dynamic": "^6.0.2",
     "@angular/router": "^6.0.2",
+    "@clr/angular": "^0.11.14",
+    "@clr/icons": "^0.11.14",
+    "@clr/ui": "^0.11.14",
     "@webcomponents/custom-elements": "^1.1.0",
     "core-js": "^2.5.4",
     "dat.gui": "^0.7.1",
@@ -30,7 +33,6 @@
     "rxjs-compat": "^6.1.0",
     "rxjs-websockets": "^4.0.0",
     "three": "^0.92.0",
-    "webvr-polyfill": "^0.9.18",
     "zone.js": "^0.8.24"
   },
   "devDependencies": {

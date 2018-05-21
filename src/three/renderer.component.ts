@@ -12,7 +12,6 @@ export class RendererComponent implements OnChanges, AfterContentInit {
 
   @Input() height: number;
   @Input() width: number;
-  @Input() isVRMode = false;
   @Input() updateCallback$: Subject<Point>;
 
   @ContentChild(SceneComponent) sceneComp: SceneComponent;
@@ -45,6 +44,7 @@ export class RendererComponent implements OnChanges, AfterContentInit {
     const heightChng = changes.height && changes.height.currentValue;
     if (widthChng || heightChng) {
       this.renderer.setSize(this.width, this.height);
+      this.render();
     }
   }
 
@@ -64,9 +64,12 @@ export class RendererComponent implements OnChanges, AfterContentInit {
   }
 
   render() {
-    this.orbitComponent.updateControls(this.scene, this.camera);
-    this.camera.lookAt(this.scene.position);
-    // this.renderer.render(this.scene, this.camera);
+    try {
+      this.orbitComponent.updateControls(this.scene, this.camera);
+      this.camera.lookAt(this.scene.position);
+      // this.renderer.render(this.scene, this.camera);
+    } catch (e) {
+    }
 
     requestAnimationFrame(() => this.render());
   }

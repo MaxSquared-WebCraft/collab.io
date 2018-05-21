@@ -1,5 +1,4 @@
-import {Component, ElementRef} from '@angular/core';
-import {requestFullScreen} from '../utils/fullscreen';
+import {Component} from '@angular/core';
 import './app.scss';
 
 @Component({
@@ -7,19 +6,7 @@ import './app.scss';
   templateUrl: 'app.component.html'
 })
 export class AppComponent {
-  image: any;
-  audioData: any;
-  isFullScreen = false;
 
-  constructor(private element: ElementRef) {
+  constructor() {
   }
-
-  toggleFullScreen() {
-    this.isFullScreen = !this.isFullScreen;
-
-    if (!this.isFullScreen) {
-      requestFullScreen(this.element.nativeElement);
-    }
-  }
-
 }

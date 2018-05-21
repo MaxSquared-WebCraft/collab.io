@@ -14,11 +14,11 @@ export class StrokeComponent implements OnInit {
 
   @Input() strokeInput$: Observable<Point>;
   @Input() updateCallback$: Subject<Point>;
+  @Input() currentColor = new Color(0xFF0000);
 
   private verticesIdx = 0;
   private indicesIdx = 0;
   private verticesCount = 0;
-  private currentColor = new Color(0xFF0000);
   private finalized = false;
   private new = true;
 

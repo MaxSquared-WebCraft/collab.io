@@ -1,0 +1,12 @@
+<div class="main-container">
+  <header class="header header-6">
+    <mnb-drawing-surface-controls></mnb-drawing-surface-controls>
+  </header>
+  <div class="content-container">
+    <mnb-drawing-surface-user-indicator></mnb-drawing-surface-user-indicator>
+    <three [width]="width" [height]="height"></three>
+  </div>
+  <header class="header header-6">
+    <mnb-drawing-surface-tool (onSelectedColorChanged)="colorChanged($event)"></mnb-drawing-surface-tool>
+  </header>
+</div>
