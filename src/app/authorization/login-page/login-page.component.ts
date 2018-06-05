@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { Login } from '../shared/Login';
 import { AuthService } from '../../shared/services/auth.service';
 
 @Component({
@@ -9,11 +8,9 @@ import { AuthService } from '../../shared/services/auth.service';
 })
 export class LoginPageComponent {
 
-  public model = new Login();
-
   constructor(private readonly authService: AuthService) { }
 
-  public onSubmit() {
-    this.authService.login(this.model.username, this.model.password)
+  public onSubmit(username: string, password: string) {
+    this.authService.login(username, password)
   }
 }
