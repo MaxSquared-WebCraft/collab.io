@@ -4,7 +4,9 @@
 // The list of which env maps to which file can be found in `.angular-cli.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  tokenName: 'collab_auth_token',
+  baseUrl: 'http://localhost:8080'
 };
 
 /*

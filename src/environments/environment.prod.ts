@@ -1,3 +1,6 @@
+// noinspection JSUnusedGlobalSymbols
 export const environment = {
-  production: true
+  production: true,
+  tokenName: 'collab_auth_token',
+  baseUrl: 'nix',
 };
