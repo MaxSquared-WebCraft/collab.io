@@ -3,7 +3,10 @@
   "compilerOptions": {
     "outDir": "../out-tsc/app",
     "module": "es2015",
-    "types": []
+    "types": [],
+    "paths": {
+      "@environment": ["src/environments/environment.ts"]
+    }
   },
   "exclude": [
     "src/test.ts",
