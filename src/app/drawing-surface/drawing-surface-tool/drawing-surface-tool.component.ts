@@ -9,7 +9,7 @@ import {BehaviorSubject} from 'rxjs';
 export class DrawingSurfaceToolComponent implements OnInit {
   public arrayColors: any = [];
   public selectedColorIdx = 0;
-  iconColor: string = "#FFFFFF";
+  iconColor: string = '#FFFFFF';
 
   @Output() onSelectedColorChanged = new BehaviorSubject<string>('#000000');
 
@@ -36,6 +36,6 @@ export class DrawingSurfaceToolComponent implements OnInit {
     let r = parseInt(color.substring(0, 2), 16); // hexToR
     let g = parseInt(color.substring(2, 4), 16); // hexToG
     let b = parseInt(color.substring(4, 6), 16); // hexToB
-    return (((r * 0.299) + (g * 0.587) + (b * 0.114)) > 120) ? "#000000" : "#FFFFFF";
+    return (((r * 0.299) + (g * 0.587) + (b * 0.114)) > 120) ? '#000000' : '#FFFFFF';
   }
 }

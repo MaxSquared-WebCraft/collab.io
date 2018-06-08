@@ -7,9 +7,11 @@ import {Point} from '../models/point.model';
 @Injectable()
 export class SimplifyService {
   public simplify(points: Point[], tolerance: number) {
-    if (points.length <= 2) return points;
+    if (points.length <= 2) {
+      return points;
+    }
 
-    let sqTolerance = tolerance !== undefined ? tolerance * tolerance : 1;
+    const sqTolerance = tolerance !== undefined ? tolerance * tolerance : 1;
     points = this.simplifyDouglasPeucker(points, sqTolerance);
 
     return points;
@@ -23,7 +25,7 @@ export class SimplifyService {
 
     if (dx !== 0 || dy !== 0) {
 
-      let t = ((p.position.x - x) * dx + (p.position.y - y) * dy) / (dx * dx + dy * dy);
+      const t = ((p.position.x - x) * dx + (p.position.y - y) * dy) / (dx * dx + dy * dy);
 
       if (t > 1) {
         x = p2.position.x;
@@ -46,7 +48,7 @@ export class SimplifyService {
       index;
 
     for (let i = first + 1; i < last; i++) {
-      let sqDist = this.getSqSegDist(points[i], points[first], points[last]);
+      const sqDist = this.getSqSegDist(points[i], points[first], points[last]);
 
       if (sqDist > maxSqDist) {
         index = i;
@@ -55,16 +57,20 @@ export class SimplifyService {
     }
 
     if (maxSqDist > sqTolerance) {
-      if (index - first > 1) this.simplifyDPStep(points, first, index, sqTolerance, simplified);
+      if (index - first > 1) {
+        this.simplifyDPStep(points, first, index, sqTolerance, simplified);
+      }
       simplified.push(points[index]);
-      if (last - index > 1) this.simplifyDPStep(points, index, last, sqTolerance, simplified);
+      if (last - index > 1) {
+        this.simplifyDPStep(points, index, last, sqTolerance, simplified);
+      }
     }
   }
 
   private simplifyDouglasPeucker(points: Point[], sqTolerance: number) {
-    let last = points.length - 1;
+    const last = points.length - 1;
 
-    let simplified = [points[0]];
+    const simplified = [points[0]];
     this.simplifyDPStep(points, 0, last, sqTolerance, simplified);
     simplified.push(points[last]);
 
