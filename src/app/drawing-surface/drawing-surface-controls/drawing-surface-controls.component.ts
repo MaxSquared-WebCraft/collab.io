@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, ElementRef, OnInit} from '@angular/core';
 
 @Component({
   selector: 'mnb-drawing-surface-controls',
@@ -7,10 +7,10 @@ import {Component, OnInit} from '@angular/core';
 })
 export class DrawingSurfaceControlsComponent implements OnInit {
 
-  constructor() {
+
+  constructor(private element: ElementRef) {
   }
 
   ngOnInit() {
   }
-
 }
