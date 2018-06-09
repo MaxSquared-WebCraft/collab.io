@@ -5,12 +5,11 @@ import {Observable} from 'rxjs/Observable';
 import {Subject} from 'rxjs/Subject';
 import {Point} from '../../drawing-surface/shared/models/point.model';
 
-const MAX_POINTS = 25000;
+const MAX_POINTS = 75000;
 
 @Directive({selector: 'three-stroke'})
 export class StrokeComponent implements OnInit {
   object: THREE.Mesh;
-  debugMesh: THREE.Mesh;
 
   @Input() strokeInput$: Observable<Point>;
   @Input() updateCallback$: Subject<Point>;
@@ -29,7 +28,10 @@ export class StrokeComponent implements OnInit {
     this.strokeInput$.subscribe(
       (point: Point) => this.updateGeometry(point),
       null,
-      () => this.updateGeometry(this.lastPoint, true)
+      () => {
+        this.updateGeometry(this.lastPoint, true);
+        this.finalizeMesh();
+      }
     );
   }
 
@@ -248,6 +250,7 @@ export class StrokeComponent implements OnInit {
     tempGeo.index = new BufferAttribute(indices, 1);
     tempGeo.addAttribute('position', new THREE.Float32BufferAttribute(vertices, 3).onUpload(disposeArray));
     tempGeo.setDrawRange(0, this.verticesIdx);
+    tempGeo.computeBoundingBox();
     this.finalized = true;
   }
 
@@ -268,19 +271,9 @@ export class StrokeComponent implements OnInit {
         color: this.currentColor.getHex(), // TODO: Get color from tools service
         side: THREE.FrontSide
       }));
-
-      // console.log(this.renderer.info);
-
       return {vertices, indices};
     } else {
       const tempGeo: any = this.object.geometry;
-
-      // if (environment.debug) {
-      //   const edges = new WireframeGeometry(tempGeo.clone());
-      //   var line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({color: 0x00FF00}));
-      //   this.scene.add(line);
-      // }
-
       return {vertices: tempGeo.attributes.position.array, indices: tempGeo.index.array};
     }
   }

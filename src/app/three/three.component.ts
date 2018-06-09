@@ -1,6 +1,6 @@
 import {AfterContentInit, Component, Input, OnInit, ViewChild} from '@angular/core';
 import {fromEvent as observableFromEvent, merge, Observable} from 'rxjs';
-import {distinctUntilChanged, filter, groupBy, map, mergeMap, share, startWith, takeUntil} from 'rxjs/operators';
+import {distinctUntilChanged, filter, groupBy, map, mergeMap, share, startWith, takeUntil, tap} from 'rxjs/operators';
 import {Color, Vector2, Vector3} from 'three';
 import {RendererComponent} from './renderer.component';
 import {GroupedObservable} from 'rxjs/internal-compatibility';
@@ -47,6 +47,7 @@ export class ThreeComponent implements OnInit, AfterContentInit {
       }),
       map((e: PointerEvent) => new Point(e.pointerId, Date.now(),
         new Vector2(e.pageX, e.pageY), e.pressure ? e.pressure : 0.5)),
+      tap((point: Point) => console.log(point)),
       distinctUntilChanged()
     );
 
