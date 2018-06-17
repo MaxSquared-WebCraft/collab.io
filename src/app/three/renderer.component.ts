@@ -51,7 +51,7 @@ export class RendererComponent implements OnChanges, AfterContentInit {
     this.renderer.setSize(this.width, this.height);
     this.renderer.setClearColor(0xFFFFFF);
     this.element.nativeElement.appendChild(this.renderer.domElement);
-    this.renderer.setPixelRatio(Math.floor(window.devicePixelRatio));
+    // this.renderer.setPixelRatio(Math.floor(window.devicePixelRatio));
     this.orbitComponent.setupControls(this.camera, this.renderer);
 
     this.updateCallback$.subscribe(

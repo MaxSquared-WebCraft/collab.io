@@ -19,7 +19,7 @@ export class OrthograpicCameraDirective implements OnInit, OnChanges {
     const heightChng = changes.height && changes.height.currentValue;
 
     if (widthChng || heightChng) {
-      this.updateAspect(widthChng, heightChng);
+      this.updateAspect(this.width, this.height);
     }
   }
 
