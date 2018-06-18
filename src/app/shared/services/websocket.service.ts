@@ -1,8 +1,8 @@
-import {Observable, throwError as observableThrowError} from 'rxjs';
+import { Observable, throwError as observableThrowError } from 'rxjs';
 
-import {map, share} from 'rxjs/operators';
-import {Injectable} from '@angular/core';
-import {QueueingSubject} from 'queueing-subject';
+import { map, share } from 'rxjs/operators';
+import { Injectable } from '@angular/core';
+import { QueueingSubject } from 'queueing-subject';
 import websocketConnect from 'rxjs-websockets';
 
 
@@ -24,7 +24,7 @@ export class SocketService {
         map((message: string) => {
           try {
             const msg: any = JSON.parse(message);
-            return ({time: msg.data.time, ...JSON.parse(msg.data.utf8Data)});
+            return ({ time: msg.data.time, ...JSON.parse(msg.data.utf8Data) });
           } catch (e) {
             return observableThrowError(e);
           }
