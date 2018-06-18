@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {SocketService} from '../shared/services/websocket.service';
+import {SocketService} from '../../shared/services/websocket.service';
 import {RenderService} from '../shared/services/render.service';
 
 @Component({

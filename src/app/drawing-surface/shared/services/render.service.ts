@@ -1,6 +1,6 @@
 import {Color} from 'three';
 import {Injectable} from '@angular/core';
-import {SocketService} from './websocket.service';
+import {SocketService} from '../../../shared/services/websocket.service';
 
 declare let THREE: any;
 

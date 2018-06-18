@@ -46,7 +46,7 @@ export class AuthService {
       .post('/user/login', { username, password })
       .subscribe((token: string) => {
         this.setToken(token);
-        this.router.navigate(['/scribble'])
+        this.router.navigate(['/rooms'])
       })
   }
 
