@@ -1,6 +1,7 @@
 import {Component, HostListener, ViewChild} from '@angular/core';
 import {Color} from 'three';
 import {ThreeComponent} from '../three/three.component';
+import { RoomService } from '../shared/services/room.service';
 
 @Component({
   selector: 'mnb-drawing-surface',
@@ -12,9 +13,12 @@ export class DrawingSurfaceComponent {
   width: number;
   height: number;
 
-  constructor() {
+  constructor(
+    private readonly roomService: RoomService
+  ) {
     this.height = window.innerHeight - 2 * 60;
     this.width = window.innerWidth;
+    this.roomService.getRoomOfUser();
   }
 
   @HostListener('window:resize')
