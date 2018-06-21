@@ -1,9 +1,11 @@
 import { Observable, throwError as observableThrowError } from 'rxjs';
-
 import { map, share } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import { QueueingSubject } from 'queueing-subject';
+import { RoomService } from './room.service';
 import websocketConnect from 'rxjs-websockets';
+import { connect } from 'socket.io-client'
+import { environment } from '@environment';
 
 
 @Injectable()
@@ -11,6 +13,14 @@ export class SocketService {
   public messages: Observable<string>;
   private inputStream: QueueingSubject<string>;
   private connectedClients: any[]; // should contain observable of connected users and show positions
+
+  constructor(
+    private readonly roomService: RoomService
+  ) {}
+
+  connectSocketIo() {
+    connect(environment.baseUrl)
+  }
 
   public connect() {
     if (this.messages) {
