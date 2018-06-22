@@ -1,6 +1,7 @@
 import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
-import {Color} from 'three';
-import {ThreeComponent} from '../three/three.component';
+import { Color } from 'three';
+import { ThreeComponent } from '../three/three.component';
+import { SocketService } from '../shared/services/websocket.service';
 import { RoomService } from '../shared/services/room.service';
 
 @Component({
@@ -14,14 +15,15 @@ export class DrawingSurfaceComponent implements OnInit {
   height: number;
 
   constructor(
-    private readonly roomService: RoomService
+    private readonly socketService: SocketService,
+    private readonly roomService: RoomService,
   ) {
     this.height = window.innerHeight - 2 * 60;
     this.width = window.innerWidth;
   }
 
   ngOnInit(): void {
-    this.roomService.getRoomOfUser();
+    this.socketService.connectSocketIo(this.roomService.Room)
   }
 
   @HostListener('window:resize')

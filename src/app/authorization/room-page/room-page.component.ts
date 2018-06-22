@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RoomService } from '../../shared/services/room.service';
 
 @Component({
@@ -6,11 +6,15 @@ import { RoomService } from '../../shared/services/room.service';
   templateUrl: './room-page.component.html',
   styleUrls: ['./room-page.component.css']
 })
-export class RoomPageComponent {
+export class RoomPageComponent implements OnInit {
 
   constructor(
     private readonly roomService: RoomService,
   ) { }
+
+  ngOnInit(): void {
+    this.roomService.getRoomOfUser();
+  }
 
   onJoinRoom(roomName: string) {
     console.log('join room', roomName);

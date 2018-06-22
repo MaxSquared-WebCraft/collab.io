@@ -9,6 +9,6 @@ export class RenderService {
   private currentColor = new Color(0x000000);
 
   constructor(private serverSocket: SocketService) {
-    this.serverSocket.connect();
+    //this.serverSocket.connect();
   }
 }

@@ -4,8 +4,10 @@ import { Injectable } from '@angular/core';
 import { QueueingSubject } from 'queueing-subject';
 import { RoomService } from './room.service';
 import websocketConnect from 'rxjs-websockets';
-import { connect } from 'socket.io-client'
+import { connect } from 'socket.io-client';
 import { environment } from '@environment';
+import { AuthService } from './auth.service';
+import { Room } from '../models/room.model';
 
 
 @Injectable()
@@ -13,13 +15,27 @@ export class SocketService {
   public messages: Observable<string>;
   private inputStream: QueueingSubject<string>;
   private connectedClients: any[]; // should contain observable of connected users and show positions
+  private socket: SocketIOClient.Socket = null;
+
 
   constructor(
-    private readonly roomService: RoomService
+    private readonly roomService: RoomService,
+    private readonly authService: AuthService,
   ) {}
 
-  connectSocketIo() {
-    connect(environment.baseUrl)
+  connectSocketIo(room: Room) {
+
+    console.log('connecting to websockets server');
+
+    const auth = this.authService.getToken();
+    const user = this.authService.getUserFromToken();
+
+    this.socket = connect(environment.baseUrl, { query: { auth } });
+
+    this.socket.on('connect', () => {
+      console.log('socket connected, connecting to room', room);
+      this.socket.emit('room', { userId: user.id, roomId: room.uuid });
+    });
   }
 
   public connect() {
