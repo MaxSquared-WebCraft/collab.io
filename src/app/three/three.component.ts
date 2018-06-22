@@ -57,7 +57,7 @@ export class ThreeComponent implements OnInit, AfterContentInit {
         return e;
       }),
       map((e: PointerEvent) => new Point(
-        e.pointerId,
+        Number.parseInt(`${e.pointerId}${this.authService.getUserFromToken().id}`),
         Date.now(),
         new Vector2(e.pageX, e.pageY),
         e.pressure ? e.pressure : 0.5)
@@ -117,8 +117,6 @@ export class ThreeComponent implements OnInit, AfterContentInit {
       transformSocketMessageToPoint,
       share(),
     );
-
-    merge(socketMouseDown$, this.mouseDown$).subscribe((test) => console.log('compare mouse down', test));
 
     /**
      * Moves
