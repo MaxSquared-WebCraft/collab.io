@@ -1,18 +1,18 @@
-import { Observable, throwError as observableThrowError } from 'rxjs';
-import { map, share } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { QueueingSubject } from 'queueing-subject';
 import { RoomService } from './room.service';
-import websocketConnect from 'rxjs-websockets';
 import { connect } from 'socket.io-client';
 import { environment } from '@environment';
 import { AuthService } from './auth.service';
 import { Room } from '../models/room.model';
+import { share } from 'rxjs/operators';
+import { SocketMessage } from '../models/socket-message.model';
 
 
 @Injectable()
 export class SocketService {
-  public messages: Observable<string>;
+  public messages: Observable<SocketMessage>;
   private inputStream: QueueingSubject<string>;
   private connectedClients: any[]; // should contain observable of connected users and show positions
   private socket: SocketIOClient.Socket = null;
@@ -36,8 +36,13 @@ export class SocketService {
       console.log('socket connected, connecting to room', room);
       this.socket.emit('room', { userId: user.id, roomId: room.uuid });
     });
+
+    this.messages = new Observable<SocketMessage>((subscriber => {
+      this.socket.on('message', (message) => subscriber.next(message));
+    })).pipe(share());
   }
 
+  /*
   public connect() {
     if (this.messages) {
       return;
@@ -58,8 +63,9 @@ export class SocketService {
         share()
       );
   }
+  */
 
-  public send(message: string): void {
-    this.inputStream.next(message);
+  public readonly send = (p: any): void => {
+    this.socket.emit('message', p)
   }
 }

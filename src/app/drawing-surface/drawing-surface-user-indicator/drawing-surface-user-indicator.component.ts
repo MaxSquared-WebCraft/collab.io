@@ -12,9 +12,9 @@ export class DrawingSurfaceUserIndicatorComponent implements OnInit {
   public x = 10;
   public y = 10;
 
-  constructor(private socketServer: SocketService,
+  constructor(private socketService: SocketService,
               private renderService: RenderService) {
-    // this.socketServer.messages.subscribe(
+    // this.socketService.messages.subscribe(
     //   (point: any) => {
     //     try {
     //       if (point && point.data && point.data.position) {
