@@ -1,8 +1,6 @@
-export class TokenUser {
+export class User {
   constructor(
-    public username: string,
+    public name: string,
     public id: number,
-    public exp: number,
-    public iat: number,
   ) {}
 }

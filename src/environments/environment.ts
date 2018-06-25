@@ -6,7 +6,7 @@
 export const environment = {
   production: false,
   tokenName: 'collab_auth_token',
-  baseUrl: 'http://localhost:8080'
+  baseUrl: 'http://192.168.1.25:8080'
 };
 
 /*

@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {SocketService} from '../shared/services/websocket.service';
+import {SocketService} from '../../shared/services/websocket.service';
 import {RenderService} from '../shared/services/render.service';
 
 @Component({
@@ -12,9 +12,9 @@ export class DrawingSurfaceUserIndicatorComponent implements OnInit {
   public x = 10;
   public y = 10;
 
-  constructor(private socketServer: SocketService,
+  constructor(private socketService: SocketService,
               private renderService: RenderService) {
-    // this.socketServer.messages.subscribe(
+    // this.socketService.messages.subscribe(
     //   (point: any) => {
     //     try {
     //       if (point && point.data && point.data.position) {

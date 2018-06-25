@@ -1,0 +1,36 @@
+<div class="container">
+  <div class="row">
+    <div class="col-lg-6 col-md-12">
+      <div class="card">
+        <div class="card-header">
+          Choose existing room
+        </div>
+        <div class="card-block">
+          <form (submit)="onJoinRoom(newRoomName.value)">
+            <div class="form-group">
+              <label class="required" for="existing-room-name">Room name</label>
+              <input #newRoomName type="text" id="existing-room-name" size="45">
+            </div>
+            <button class="btn btn-outline" type="submit">Join</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6 col-md-12">
+      <div class="card">
+        <div class="card-header">
+          Create a new room
+        </div>
+        <div class="card-block">
+          <form (submit)="onCreateNewRoom(existingRoomName.value)">
+            <div class="form-group">
+              <label class="required" for="new-room-name">Room name</label>
+              <input #existingRoomName type="text" id="new-room-name" size="45">
+            </div>
+            <button class="btn btn-outline" type="submit">Create new room</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

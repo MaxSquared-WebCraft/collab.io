@@ -1,6 +1,5 @@
-import { environment } from '@environment';
+import { environment } from '../../../environments/environment';
 
-// noinspection JSUnusedGlobalSymbols
 export const jwtOptionsFactory = () => ({
   whitelistedDomains: [environment.baseUrl],
   blacklistedDomains: [environment.baseUrl + '/user/login'],

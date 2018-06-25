@@ -1,11 +1,14 @@
-import {AfterContentInit, Component, Input, OnInit, ViewChild} from '@angular/core';
-import {fromEvent as observableFromEvent, merge, Observable} from 'rxjs';
-import {distinctUntilChanged, filter, groupBy, map, mergeMap, share, startWith, takeUntil} from 'rxjs/operators';
-import {Color, Vector2, Vector3} from 'three';
-import {RendererComponent} from './renderer.component';
-import {GroupedObservable} from 'rxjs/internal-compatibility';
-import {Subject} from 'rxjs/Subject';
-import {Point} from '../drawing-surface/shared/models/point.model';
+import { AfterContentInit, Component, Input, OnInit, ViewChild } from '@angular/core';
+import { fromEvent as observableFromEvent, merge, Observable } from 'rxjs';
+import { distinctUntilChanged, filter, groupBy, map, mergeMap, share, startWith, takeUntil } from 'rxjs/operators';
+import { Color, Vector2, Vector3 } from 'three';
+import { RendererComponent } from './renderer.component';
+import { GroupedObservable } from 'rxjs/internal-compatibility';
+import { Subject } from 'rxjs/Subject';
+import { Point } from '../drawing-surface/shared/models/point.model';
+import { SocketService } from '../shared/services/websocket.service';
+import { AuthService } from '../shared/services/auth.service';
+import { SocketMessage } from '../shared/models/socket-message.model';
 
 @Component({
   selector: 'three',
@@ -13,8 +16,10 @@ import {Point} from '../drawing-surface/shared/models/point.model';
     <three-renderer [height]="height" [width]="width" [updateCallback$]="update$">
       <three-orbit-controls [updateCallback$]="update$"></three-orbit-controls>
       <three-scene [meshesUpdated]="update$">
-        <three-orthographic-camera [height]="height" [width]="width" [positions]="[0, 0, 0]"></three-orthographic-camera>
-        <three-stroke *ngFor="let obs$ of activeStrokes" [strokeInput$]="obs$" [updateCallback$]="update$" [currentColor]="color">
+        <three-orthographic-camera [height]="height" [width]="width"
+                                   [positions]="[0, 0, 0]"></three-orthographic-camera>
+        <three-stroke *ngFor="let obs$ of activeStrokes" [strokeInput$]="obs$" [updateCallback$]="update$"
+                      [currentColor]="color">
         </three-stroke>
       </three-scene>
     </three-renderer>
@@ -36,32 +41,82 @@ export class ThreeComponent implements OnInit, AfterContentInit {
 
   @ViewChild(RendererComponent) canvas: RendererComponent;
 
+  constructor(
+    private readonly socketService: SocketService,
+    private readonly authService: AuthService,
+  ) {}
+
   ngOnInit(): void {
   }
 
   ngAfterContentInit(): void {
+
     const normalizeInput = (changes: Observable<PointerEvent>) => changes.pipe(
       map((e: PointerEvent) => {
         e.preventDefault();
         return e;
       }),
-      map((e: PointerEvent) => new Point(e.pointerId, Date.now(),
-        new Vector2(e.pageX, e.pageY), e.pressure ? e.pressure : 0.5)),
+      map((e: PointerEvent) => new Point(
+        Number.parseInt(`${e.pointerId}${this.authService.getUserFromToken().id}`),
+        Date.now(),
+        new Vector2(e.pageX, e.pageY),
+        e.pressure ? e.pressure : 0.5)
+      ),
       distinctUntilChanged()
     );
 
+    const transformPointToSocketMsg = (type: string) => map((point: Point): SocketMessage => {
+      const user = this.authService.getUserFromToken();
+      return new SocketMessage(point, user, type);
+    });
+
+    const filterForType = (type: string) => filter((message: SocketMessage) => message.type === type);
+
+    const transformSocketMessageToPoint = map((message: SocketMessage) => {
+      const point = message.point;
+      return new Point(
+        point.identifier,
+        point.time,
+        new Vector2(point.position.x, point.position.y),
+        point.thickness,
+      )
+    });
+
     this.mouseDown$ = merge(
       observableFromEvent(this.canvas.nativeElement, 'pointerdown').pipe(normalizeInput),
-    ).pipe(share(), map<Point, Point>(this.mapMouseToScreen.bind(this)));
+    ).pipe(/* is the share needed here? */map<Point, Point>(this.mapMouseToScreen.bind(this)), share());
 
     this.mouseMove$ = merge(
-      observableFromEvent(this.canvas.nativeElement, 'pointermove').pipe(normalizeInput)
-    ).pipe(share(), map<Point, Point>(this.mapMouseToScreen.bind(this)));
+      observableFromEvent(this.canvas.nativeElement, 'pointermove').pipe(normalizeInput),
+    ).pipe(/* is the share needed here? */map<Point, Point>(this.mapMouseToScreen.bind(this)), share());
 
     this.mouseUp$ = merge(
       observableFromEvent(this.canvas.nativeElement, 'pointerup').pipe(normalizeInput),
-      observableFromEvent(this.canvas.nativeElement, 'pointerleave').pipe(normalizeInput)
-    ).pipe(share(), map<Point, Point>(this.mapMouseToScreen.bind(this)));
+      observableFromEvent(this.canvas.nativeElement, 'pointerleave').pipe(normalizeInput),
+      observableFromEvent(this.canvas.nativeElement, 'pointerout').pipe(normalizeInput),
+    ).pipe(/* is the share needed here? */map<Point, Point>(this.mapMouseToScreen.bind(this)), share());
+
+    this.mouseDown$.pipe(transformPointToSocketMsg('mouseDown')).subscribe(this.socketService.send);
+    this.mouseMove$.pipe(transformPointToSocketMsg('mouseMove')).subscribe(this.socketService.send);
+    this.mouseUp$.pipe(transformPointToSocketMsg('mouseUp')).subscribe(this.socketService.send);
+
+    const socketMouseDown$ = this.socketService.messages.pipe(
+      filterForType('mouseDown'),
+      transformSocketMessageToPoint,
+      share(),
+    );
+
+    const socketMouseMove$ = this.socketService.messages.pipe(
+      filterForType('mouseMove'),
+      transformSocketMessageToPoint,
+      share(),
+    );
+
+    const socketMouseUp$ = this.socketService.messages.pipe(
+      filterForType('mouseUp'),
+      transformSocketMessageToPoint,
+      share(),
+    );
 
     /**
      * Moves
@@ -70,17 +125,23 @@ export class ThreeComponent implements OnInit, AfterContentInit {
      * Keep in mind that the first and last event of a group may be the same event.
      **/
 
-    this.mouseMoves$ = this.mouseDown$.pipe(
-      mergeMap((e: Point) => this.mouseMove$.pipe(
-        filter((b: Point) => b.identifier === e.identifier),
-        takeUntil(this.mouseUp$.pipe(filter((b) => b.identifier === e.identifier))),
-        startWith(e)
-      ))
-    ).pipe(
-      groupBy((p: Point) => p.identifier, (p: Point) => p, (group: any) =>
-        this.mouseUp$.pipe(filter((e: Point) => e.identifier === group.key))),
-      share()
-    );
+    this.mouseMoves$ = merge(this.mouseDown$, socketMouseDown$)
+      .pipe(
+        mergeMap((e: Point) => merge(this.mouseMove$, socketMouseMove$).pipe(
+          filter((b: Point) => b.identifier === e.identifier),
+          takeUntil(merge(this.mouseUp$, socketMouseUp$).pipe(filter((b) => b.identifier === e.identifier))),
+          startWith(e)
+        ))
+      ).pipe(
+        groupBy(
+          (p: Point) => p.identifier,
+          (p: Point) => p,
+          (group: any) => merge(this.mouseUp$, socketMouseUp$).pipe(
+            filter((e: Point) => e.identifier === group.key)
+          )
+        ),
+        share()
+      );
 
     this.mouseMoves$.subscribe((g: any) => {
       this.activeStrokes.push(g);
