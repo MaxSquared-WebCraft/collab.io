@@ -3,11 +3,11 @@ import { Injectable } from '@angular/core';
 import { QueueingSubject } from 'queueing-subject';
 import { RoomService } from './room.service';
 import { connect } from 'socket.io-client';
-import { environment } from '@environment';
 import { AuthService } from './auth.service';
 import { Room } from '../models/room.model';
 import { share } from 'rxjs/operators';
 import { SocketMessage } from '../models/socket-message.model';
+import { environment } from '../../../environments/environment';
 
 
 @Injectable()

@@ -11,6 +11,6 @@ export class LoginPageComponent {
   constructor(private readonly authService: AuthService) { }
 
   public onSubmit(username: string, password: string) {
-    this.authService.login(username, password)
+    this.authService.login(username, password);
   }
 }
